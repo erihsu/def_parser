@@ -1,0 +1,11 @@
+[package]
+name = "def_parser"
+version = "0.1.0"
+authors = ["Eric Xu <zenyeehsu@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+def_api = {path = "../def_api"}
+def = {path="../def"}
+nom = "5.0"
+
