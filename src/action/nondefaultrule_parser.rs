@@ -1,8 +1,7 @@
 use crate::action::action_types::Ndr;
-use crate::action::common_parse::{float, number, qstring, tstring, ws};
+use crate::action::common_parse::{number, properties, tstring, ws};
 use nom::combinator::{map, opt};
 
-use nom::branch::alt;
 use nom::bytes::complete::tag;
 use nom::multi::many0;
 use nom::sequence::{delimited, preceded, terminated, tuple};
@@ -17,38 +16,47 @@ pub fn ndr_section(
         Vec<Ndr>,
     ),
 > {
-    terminated(
-        tuple((
-            delimited(ws(tag("NONDEFAULTRULES")), number, ws(tag(";"))),
-            many0(delimited(ws(tag("-")), ndr_member, ws(tag(";")))),
-        )),
-        ws(tag("END COMPONENTS")),
+    delimited(
+        tag("NONDEFAULTRULES"),
+        tuple((terminated(number, ws(tag(";"))), many0(ndr_member))),
+        tag("END COMPONENTS"),
     )(input)
 }
 
 fn ndr_member(input: &str) -> IResult<&str, Ndr> {
-    tuple((
-        tstring,
-        map(opt(ws(tag("HARDSPACING"))), |res: Option<&str>| match res {
-            Some(_) => true,
-            None => false,
-        }),
-        many0(ndr_layer),
-        many0(preceded(ws(tag("+ VIA")), tstring)),
-        preceded(ws(tag("+ VIARULE")), tstring),
-        preceded(ws(tag("+ MINCUTS")), tuple((tstring, number))),
-        many0(tuple((
-            preceded(ws(tag("+ PROPERTY")), tstring),
-            opt(alt((qstring, tstring))),
-            opt(float),
-        ))),
-    ))(input)
+    delimited(
+        tag("-"),
+        tuple((
+            tstring,
+            map(opt(ws(tag("HARDSPACING"))), |res: Option<&str>| match res {
+                Some(_) => true,
+                None => false,
+            }),
+            many0(ndr_layer),
+            many0(preceded(ws(tag("+ VIA")), tstring)),
+            preceded(ws(tag("+ VIARULE")), tstring),
+            preceded(ws(tag("+ MINCUTS")), tuple((tstring, number))),
+            properties,
+        )),
+        ws(tag(";")),
+    )(input)
 }
 
-fn ndr_layer(input: &str) -> IResult<&str, (&str, i32, i32, i32, i32)> {
+fn ndr_layer(
+    input: &str,
+) -> IResult<
+    &str,
+    (
+        &str, // name
+        i32,  // width
+        i32,  // diagwidth
+        i32,  // spacing
+        i32,  // wireext
+    ),
+> {
     tuple((
-        preceded(ws(tag("+ LAYER")), tstring),
-        preceded(ws(tag("+ WIDTH")), number),
+        preceded(tag("+ LAYER"), tstring),
+        preceded(tag("WIDTH"), number),
         map(
             opt(preceded(ws(tag("+ DIAGWIDTH")), number)),
             |res: Option<i32>| {

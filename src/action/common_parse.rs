@@ -1,4 +1,5 @@
 use nom::branch::alt;
+
 use nom::bytes::complete::{is_not, tag};
 use nom::character::complete::{alpha1, alphanumeric1, char, digit1, multispace0, one_of, space0};
 use nom::combinator::{map, map_res, opt, recognize};
@@ -9,6 +10,8 @@ use nom::sequence::{delimited, pair, preceded, separated_pair, terminated, tuple
 use nom::IResult;
 use std::str;
 use std::str::FromStr;
+
+use crate::action::action_types::{Geometry, Properties};
 
 // // basic parse
 
@@ -154,11 +157,11 @@ pub fn rect(input: &str) -> IResult<&str, ((i32, i32), (i32, i32))> {
     ))(input)
 }
 
-pub fn pt_list(input: &str) -> IResult<&str, Vec<(&str, &str)>> {
-    many1(pt)(input)
-}
+// pub fn pt_list(input: &str) -> IResult<&str, Vec<(&str, &str)>> {
+//     many1(pt)(input)
+// }
 
-pub fn pt_list_new(input: &str) -> IResult<&str, Vec<(i32, i32)>> {
+pub fn pt_list(input: &str) -> IResult<&str, Vec<(i32, i32)>> {
     map(many1(pt), |res: Vec<(&str, &str)>| {
         let mut out = Vec::new();
         let mut prev_x = 0;
@@ -221,6 +224,27 @@ pub fn comp_name(input: &str) -> IResult<&str, &str> {
     )))(input)
 }
 
+// Properties
+pub fn properties(input: &str) -> IResult<&str, Properties> {
+    many0(tuple((
+        preceded(ws(tag("+ PROPERTY")), tstring),
+        opt(alt((qstring, tstring))),
+        opt(float),
+    )))(input)
+}
+
+pub fn rect_or_polygon(input: &str) -> IResult<&str, Geometry> {
+    alt((
+        map(
+            preceded(tag("RECT"), rect),
+            |res: ((i32, i32), (i32, i32))| Geometry::RECT(res),
+        ),
+        map(preceded(tag("POLYGON"), pt_list), |res: Vec<(i32, i32)>| {
+            Geometry::POLYGON(res)
+        }),
+    ))(input)
+}
+
 #[cfg(test)]
 mod tests {
     use crate::action::common_parse::*;
@@ -265,7 +289,7 @@ mod tests {
     fn test_pt_list() {
         assert_eq!(
             pt_list(" (100 200) (200 400) (* 100) ;").unwrap(),
-            (";", vec![("100", "200"), ("200", "400"), ("*", "100")])
+            (";", vec![(100, 200), (200, 400), (200, 100)])
         );
     }
 }

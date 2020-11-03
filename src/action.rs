@@ -39,3 +39,6 @@ mod component_parser;
 
 #[path = "action/net_parser.rs"]
 mod net_parser;
+
+#[path = "action/snet_parser.rs"]
+mod snet_parser;

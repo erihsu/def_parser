@@ -1,9 +1,9 @@
-use crate::action::action_types::Fill;
-use crate::action::common_parse::{number, pt_list_new, tstring, ws};
+use crate::action::action_types::{Fill, Geometry};
+use crate::action::common_parse::{number, pt_list, rect_or_polygon, tstring, ws};
 use nom::branch::alt;
 use nom::bytes::complete::tag;
 use nom::combinator::{map, opt};
-use nom::multi::many1;
+use nom::multi::many0;
 
 use nom::sequence::{delimited, preceded, terminated, tuple};
 use nom::IResult;
@@ -17,32 +17,42 @@ pub fn fill_section(
         Vec<Fill>,
     ),
 > {
-    terminated(
-        tuple((
-            delimited(ws(tag("FILLS")), number, ws(tag(";"))),
-            many1(preceded(ws(tag("-")), layer_or_via_fill)),
-        )),
+    delimited(
+        tag("FILLS"),
+        tuple((terminated(number, ws(tag(";"))), many0(fill_member))),
         ws(tag("END FILLS")),
     )(input)
 }
 
-fn layer_or_via_fill(input: &str) -> IResult<&str, Fill> {
-    tuple((
-        map(alt((tag("LAYER"), tag("VIA"))), |res: &str| match res {
-            "LAYER" => 0,
-            "VIA" => 1,
-            _ => 2,
-        }),
-        tstring,
-        opt(preceded(ws(tag("+ MASK")), number)),
-        map(opt(ws(tag("+ OPC"))), |res: Option<&str>| match res {
-            Some(_) => true,
-            None => false,
-        }),
-        delimited(
-            alt((ws(tag("RECT")), ws(tag("POLYGON")), ws(tag("")))),
-            pt_list_new,
-            ws(tag(";")),
-        ),
-    ))(input)
+fn fill_member(input: &str) -> IResult<&str, Fill> {
+    delimited(
+        tag("-"),
+        alt((
+            map(
+                tuple((
+                    preceded(tag("LAYER"), tstring),
+                    opt(preceded(tag("+ MASK"), number)),
+                    map(opt(ws(tag("+ OPC"))), |res: Option<&str>| match res {
+                        Some(_) => true,
+                        None => false,
+                    }),
+                    many0(rect_or_polygon),
+                )),
+                |res: (&str, Option<i32>, bool, Vec<Geometry>)| Fill::Layer(res),
+            ),
+            map(
+                tuple((
+                    preceded(tag("VIA"), tstring),
+                    opt(preceded(tag("+ MASK"), number)),
+                    map(opt(ws(tag("+ OPC"))), |res: Option<&str>| match res {
+                        Some(_) => true,
+                        None => false,
+                    }),
+                    pt_list,
+                )),
+                |res: (&str, Option<i32>, bool, Vec<(i32, i32)>)| Fill::Via(res),
+            ),
+        )),
+        ws(tag(";")),
+    )(input)
 }

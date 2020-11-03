@@ -1,6 +1,5 @@
 use crate::action::common_parse::{float, inline_comment, number, pt_list, tstring, ws};
 
-use def::miscellaneous_rt::geometries::DefGeometries;
 use nom::branch::{alt, permutation};
 use nom::bytes::complete::tag;
 use nom::combinator::{map, opt};

@@ -7,8 +7,13 @@ pub type Properties<'a> = Vec<(
     Option<f64>,
 )>;
 
-pub type Pts = Vec<(i32, i32)>;
+#[derive(Debug)]
+pub enum Geometry {
+    RECT(((i32, i32), (i32, i32))),
+    POLYGON(Vec<(i32, i32)>),
+}
 
+pub type Pts = Vec<(i32, i32)>;
 // NONDEFAULTRULES
 pub type Ndr<'a> = (
     &'a str, // nondefault layer name
@@ -29,8 +34,8 @@ pub type Ndr<'a> = (
 
 // SLOT
 pub type Slot<'a> = (
-    &'a str, // name of slot
-    Pts,     // pts
+    &'a str,       // name of slot
+    Vec<Geometry>, // rect/polygon
 );
 
 // PINPROPERTIES
@@ -60,18 +65,19 @@ pub type Via<'a> = (
 );
 
 // GROUPS
+#[derive(Debug)]
+pub enum GroupRegion<'a> {
+    PreDefined(&'a str), // Region. use predefined region by name
+    NewDefined(((i32, i32), (i32, i32))),
+}
+
 pub type Group<'a> = (
     &'a str,      // groupName
     Vec<&'a str>, // compNamePattern. A component name, a list of component names or a pattern for a set of components
-    (
-        Option<i32>, // SOFT. maxhalfperimeter
-        Option<i32>, // SOFT. MAXX
-        Option<i32>, // SOFT. MAXY
-    ), // SOFT
-    (
-        Option<&'a str>, // Region. use predefined region by name
-        Option<(i32, i32, i32, i32)>,
-    ), // Region. predefined in REGION or rectangular region
+    Option<i32>,  // SOFT. maxhalfperimeter
+    Option<i32>,  // SOFT. MAXX
+    Option<i32>,  // SOFT. MAXY
+    GroupRegion<'a>,
     Properties<'a>,
 );
 
@@ -79,18 +85,30 @@ pub type Group<'a> = (
 pub type Region<'a> = (
     &'a str,                       // region name
     Vec<((i32, i32), (i32, i32))>, // define a region as one or more rectangular areas specified by pairs of coordinate points
-    i32,                           // TYPE. FENCE or GUIDE
+    Option<i32>,                   // TYPE. FENCE or GUIDE
     Properties<'a>,
 );
 
 // FILL
-pub type Fill<'a> = (
-    i32,         // indicates LAYER or VIA. 0 == LAYER;1 == VIA;2 == Unknown
-    &'a str,     // name of layer or via
-    Option<i32>, // MASK number
-    bool,        // Whether OPC
-    Vec<(i32, i32)>,
-);
+#[derive(Debug)]
+pub enum Fill<'a> {
+    Layer(
+        (
+            &'a str,     // name of layer
+            Option<i32>, // Mask number
+            bool,        // whether OPC
+            Vec<Geometry>,
+        ),
+    ),
+    Via(
+        (
+            &'a str,     // name of via
+            Option<i32>, // mask number
+            bool,        // whether OPC
+            Pts,
+        ),
+    ),
+}
 
 // COMPONENT
 pub type Component<'a> = (
@@ -159,7 +177,7 @@ pub type Net<'a> = (
     Properties<'a>,
 );
 
-// Special net
+// Special Net
 pub type SNet<'a> = (
     &'a str,                       // special netName
     Vec<(&'a str, &'a str, bool)>, // componentName, pinName, whether pin from PIN macro.
@@ -176,3 +194,8 @@ pub type SNet<'a> = (
 );
 
 pub type SpecialWiring = ();
+
+pub type Style = (
+    i32, // style number
+    Pts,
+);

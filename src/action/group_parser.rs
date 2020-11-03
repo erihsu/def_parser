@@ -1,12 +1,11 @@
-use crate::action::common_parse::{float, number, pt, qstring, tstring, ws};
-
+use crate::action::common_parse::{number, properties, rect, tstring, ws};
 use nom::branch::alt;
-use nom::bytes::complete::tag;
 
+use nom::bytes::complete::tag;
 use nom::combinator::{map, opt};
 use nom::multi::{many0, many1};
 
-use crate::action::action_types::Group;
+use crate::action::action_types::{Group, GroupRegion};
 use nom::sequence::{delimited, preceded, terminated, tuple};
 use nom::IResult;
 
@@ -19,41 +18,39 @@ pub fn group_section(
         Vec<Group>,
     ),
 > {
-    terminated(
+    delimited(
+        tag("GROUPS"),
         tuple((
-            delimited(ws(tag("GROUPS")), number, ws(tag(";"))),
-            many1(preceded(ws(tag("-")), group_member)),
+            terminated(
+                number, // numGroups
+                ws(tag(";")),
+            ),
+            many0(group_member),
         )),
         ws(tag("END GROUPS")),
     )(input)
 }
 
 fn group_member(input: &str) -> IResult<&str, Group> {
-    tuple((
-        tstring,
-        many1(tstring),
+    delimited(
+        tag("-"),
         tuple((
-            opt(preceded(ws(tag("+ SOFT MAXHALFPERIMETER")), number)),
-            opt(preceded(ws(tag("MAXX")), number)),
-            opt(preceded(ws(tag("MAXY")), number)),
-        )),
-        tuple((
-            opt(preceded(ws(tag("+ REGION")), tstring)),
-            opt(map(
-                preceded(ws(tag("+ REGION")), tuple((pt, pt))),
-                |res: ((&str, &str), (&str, &str))| {
-                    let xl = (res.0).0.parse::<i32>().unwrap();
-                    let yl = (res.0).1.parse::<i32>().unwrap();
-                    let xh = (res.1).0.parse::<i32>().unwrap();
-                    let yh = (res.1).1.parse::<i32>().unwrap();
-                    (xl, yl, xh, yh)
-                },
+            tstring,
+            many1(tstring),
+            opt(preceded(tag("+ SOFT MAXHALFPERIMETER"), number)),
+            opt(preceded(tag("MAXX"), number)),
+            opt(preceded(tag("MAXY"), number)),
+            alt((
+                map(preceded(tag("+ REGION"), tstring), |res: &str| {
+                    GroupRegion::PreDefined(res)
+                }),
+                map(
+                    preceded(tag("+ REGION"), rect),
+                    |res: ((i32, i32), (i32, i32))| GroupRegion::NewDefined(res),
+                ),
             )),
+            properties,
         )),
-        many0(tuple((
-            preceded(ws(tag("+ PROPERTY")), tstring),
-            opt(alt((qstring, tstring))),
-            opt(float),
-        ))),
-    ))(input)
+        ws(tag(";")),
+    )(input)
 }

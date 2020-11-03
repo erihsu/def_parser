@@ -2,7 +2,7 @@
 use crate::action::common_parse::{
     float, number, on_or_off, orient, pt_list, qstring, tstring, ws, x_or_y,
 };
-use def::miscellaneous_rt::geometries::DefGeometries;
+
 use nom::branch::alt;
 use nom::bytes::complete::tag;
 use nom::character::complete::space0;
@@ -78,32 +78,9 @@ pub fn die_area(
     input: &str,
 ) -> IResult<
     &str,
-    DefGeometries, // die area
+    Vec<(i32, i32)>, // die area
 > {
-    map(
-        delimited(ws(tag("DIEAREA")), pt_list, ws(tag(";"))),
-        |res: Vec<(&str, &str)>| {
-            let mut out = DefGeometries::new();
-            let mut prev_x = 0;
-            let mut prev_y = 0;
-            out.num_points = res.len() as i32;
-            for (pt_x, pt_y) in res {
-                if pt_x == "*" {
-                    out.x.push(prev_x);
-                } else {
-                    prev_x = pt_x.parse::<i32>().unwrap();
-                    out.x.push(prev_x);
-                }
-                if pt_y == "*" {
-                    out.y.push(prev_y);
-                } else {
-                    prev_y = pt_y.parse::<i32>().unwrap();
-                    out.y.push(prev_y);
-                }
-            }
-            out
-        },
-    )(input)
+    delimited(ws(tag("DIEAREA")), pt_list, ws(tag(";")))(input)
 }
 
 // parse property definitions
@@ -435,7 +412,7 @@ fn track_option(input: &str) -> IResult<&str, (Option<i32>, Option<bool>, Option
 
 #[cfg(test)]
 mod tests {
-    use crate::action::design_action::*;
+    use crate::action::design_parser::*;
     #[test]
     fn test_version() {
         assert_eq!(version_num("VERSION 5.8 ; \n").unwrap(), ("", 5.8));
@@ -610,11 +587,14 @@ mod tests {
             .unwrap(),
             (
                 "",
-                DefGeometries {
-                    num_points: 6,
-                    x: vec![-190000, -190000, 190000, 190000, 190360, 190360],
-                    y: vec![-120000, 350000, 350000, 190000, 190000, -120000]
-                }
+                vec![
+                    (-190000, -120000),
+                    (-190000, 350000),
+                    (190000, 350000),
+                    (190000, 190000),
+                    (190360, 190000),
+                    (190360, -120000)
+                ]
             )
         );
     }

@@ -1,11 +1,11 @@
 use crate::action::action_types::Region;
-use crate::action::common_parse::{float, number, qstring, rect, tstring, ws};
+use crate::action::common_parse::{number, properties, rect, tstring, ws};
 use nom::branch::alt;
-use nom::combinator::{map, opt};
+use nom::combinator::{map_res, opt, recognize};
 
 use nom::bytes::complete::tag;
 
-use nom::multi::many0;
+use nom::multi::{many0, many1};
 
 use nom::sequence::{delimited, preceded, terminated, tuple};
 use nom::IResult;
@@ -15,35 +15,40 @@ pub fn region_section(
 ) -> IResult<
     &str,
     (
-        i32, // numRegions
+        i32, // total number of regions
         Vec<Region>,
     ),
 > {
-    terminated(
+    delimited(
+        tag("REGIONS"),
         tuple((
-            delimited(ws(tag("REGIONS")), number, ws(tag(";"))),
-            many0(preceded(ws(tag("-")), region_member)),
+            terminated(number, ws(tag(";"))), // total number of regions
+            many0(region_member),
         )),
-        ws(tag("END REGIONS")),
+        tag("END REGIONS"),
     )(input)
 }
 
 fn region_member(input: &str) -> IResult<&str, Region> {
-    tuple((
-        tstring,
-        many0(rect),
-        map(
-            terminated(ws(tag("+ TYPE")), tstring),
-            |res: &str| match res {
-                "FENCE" => 0,
-                "GUIDE" => 1,
-                _ => 2,
-            },
-        ),
-        many0(tuple((
-            preceded(ws(tag("+ PROPERTY")), tstring),
-            opt(alt((qstring, tstring))),
-            opt(float),
-        ))),
-    ))(input)
+    delimited(
+        tag("-"),
+        tuple((
+            tstring,
+            many1(rect),
+            opt(preceded(ws(tag("+ TYPE")), region_type)),
+            properties,
+        )),
+        ws(tag(";")),
+    )(input)
+}
+
+fn region_type(input: &str) -> IResult<&str, i32> {
+    map_res(
+        recognize(alt((tag("FENCE"), tag("GUIDE")))),
+        |res: &str| match res {
+            "FENCE" => Ok(0),
+            "GUIDE" => Ok(1),
+            _ => Err(0),
+        },
+    )(input)
 }
