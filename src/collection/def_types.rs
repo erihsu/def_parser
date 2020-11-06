@@ -7,7 +7,7 @@ pub type Properties<'a> = Vec<(
     Option<f64>,
 )>;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Geometry {
     Rect(((i32, i32), (i32, i32))),
     Polygon(Vec<(i32, i32)>),
@@ -90,7 +90,7 @@ pub type Region<'a> = (
 );
 
 // FILL
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Fill<'a> {
     Layer(
         (
