@@ -2,7 +2,7 @@
 DEF Specification Parser based on nom
 
 ## Syntax
-The **DEF(Design Exchange Format)** syntax definition is carrried out by **Cadence, Inc** in lef/def reference. Standard DEF file can contain following sections and there is no order requirement of each section.
+The **DEF(Design Exchange Format)** syntax definition is carrried out by **Cadence Design System, Inc** in lef/def reference. Standard DEF file can contain following sections and there is no order requirement of each section.
 
 ```
 [ VERSION statement ]
