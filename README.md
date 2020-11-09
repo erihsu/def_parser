@@ -34,5 +34,5 @@ DESIGN statement
 [ BEGINEXT section ]
 END DESIGN statement
 ```
-**Notes**: [] around section means that the section in DEF is optional. For more details of each section definition, please refer to the [lef/def reference](http://www.ispd.cc/contests/18/lefdefref.pdf).
+**Notes**: `[]` around section means that the section in DEF is optional. For more details of each section definition, please refer to the [lef/def reference](http://www.ispd.cc/contests/18/lefdefref.pdf).
 
