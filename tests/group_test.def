@@ -1,0 +1,15 @@
+GROUPS 3 ;
+- group1 I3 I2
+  + SOFT MAXHALFPERIMETER 4000 MAXX 100000 MAXY 100000
+  + REGION region1
+  + PROPERTY strprop "aString" 
+  + PROPERTY intprop 1 
+  + PROPERTY realprop 1.1 
+  + PROPERTY intrangeprop 25
+  + PROPERTY realrangeprop 25.25 ;
+- group2 I4
+  + SOFT MAXHALFPERIMETER 4000
+  + REGION ( 0 0 ) ( 100 100 ) ;
+- region2 I7 I8
+  + REGION region2 ;
+END GROUPS

@@ -13,7 +13,7 @@ use nom::IResult;
 use std::str;
 
 use crate::def_parser::base::{float, number, number_str, qstring, tstring, ws};
-use crate::def_parser::def_types::{Geometry, NetProperty, Properties, RoutingPoint};
+use crate::def_parser::def_types::{Geometry, NetProperty, PropValue, Properties, RoutingPoint};
 
 // common parser used in def_parser. These parser are very commonly used in def_parser so collect them together.
 
@@ -161,11 +161,18 @@ pub fn comp_name(input: &str) -> IResult<&str, &str> {
 
 // Properties
 pub fn properties(input: &str) -> IResult<&str, Properties> {
-    many0(tuple((
-        preceded(ws(tag("+ PROPERTY")), tstring),
-        opt(alt((qstring, tstring))),
-        opt(float),
-    )))(input)
+    many0(preceded(
+        ws(tag("+ PROPERTY")),
+        tuple((
+            tstring,
+            alt((
+                map(tstring, |res: &str| PropValue::SValue(res)),
+                map(qstring, |res: &str| PropValue::SValue(res)),
+                map(float, |res: f64| PropValue::RValue(res)),
+                map(number, |res: i32| PropValue::IValue(res)),
+            )),
+        )),
+    ))(input)
 }
 
 pub fn rect_or_polygon(input: &str) -> IResult<&str, Geometry> {
@@ -266,6 +273,29 @@ mod tests {
         assert_eq!(
             pt_list(" (100 200) (200 400) (* 100) ;").unwrap(),
             (";", vec![(100, 200), (200, 400), (200, 100)])
+        );
+    }
+    #[test]
+    fn test_property() {
+        assert_eq!(
+            properties(
+                "  + PROPERTY strprop \"aString\" 
+  + PROPERTY intprop 1 
+  + PROPERTY realprop 1.1 
+  + PROPERTY intrangeprop 25
+  + PROPERTY realrangeprop 25.25"
+            )
+            .unwrap(),
+            (
+                "",
+                vec![
+                    ("strprop", PropValue::SValue("\"aString\"")),
+                    ("intprop", PropValue::IValue(1)),
+                    ("realprop", PropValue::RValue(1.1)),
+                    ("intrangeprop", PropValue::IValue(25)),
+                    ("realrangeprop", PropValue::RValue(25.25))
+                ]
+            )
         );
     }
 }

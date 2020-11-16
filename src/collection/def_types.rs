@@ -2,12 +2,18 @@
 
 pub type Properties<'a> = Vec<(
     // property defined in DESIGN Section
-    &'a str,         // property name
-    Option<&'a str>, // property value if it's STRING type
-    Option<f64>,
+    &'a str, // property name
+    PropValue<'a>,
 )>;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
+pub enum PropValue<'a> {
+    SValue(&'a str),
+    RValue(f64),
+    IValue(i32),
+}
+
+#[derive(Debug, PartialEq)]
 pub enum Geometry {
     Rect(((i32, i32), (i32, i32))),
     Polygon(Vec<(i32, i32)>),
@@ -65,7 +71,7 @@ pub type Via<'a> = (
 );
 
 // GROUPS
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum GroupRegion<'a> {
     PreDefined(&'a str), // Region. use predefined region by name
     NewDefined(((i32, i32), (i32, i32))),
@@ -90,7 +96,7 @@ pub type Region<'a> = (
 );
 
 // FILL
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Fill<'a> {
     Layer(
         (

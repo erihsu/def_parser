@@ -56,3 +56,63 @@ fn group_member(input: &str) -> IResult<&str, Group> {
         ws(tag(";")),
     )(input)
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::def_parser::def_types::*;
+    use crate::def_parser::group_parser::*;
+    use std::io::Read;
+
+    #[test]
+    fn test_group_section() {
+        let mut input_def = std::fs::File::open("tests/group_test.def").unwrap();
+        let mut data = String::new();
+        input_def.read_to_string(&mut data).unwrap();
+        let result = group_section(&data).unwrap();
+
+        let group_section = result.1;
+
+        let num = group_section.0;
+        let groups = group_section.1;
+
+        assert_eq!(num, 3);
+        assert_eq!(
+            groups,
+            vec![
+                (
+                    "group1",
+                    vec!["I3", "I2"],
+                    Some(4000),
+                    Some(100000),
+                    Some(100000),
+                    GroupRegion::PreDefined("region1"),
+                    vec![
+                        ("strprop", PropValue::SValue("\"aString\"")),
+                        ("intprop", PropValue::IValue(1)),
+                        ("realprop", PropValue::RValue(1.1)),
+                        ("intrangeprop", PropValue::IValue(25)),
+                        ("realrangeprop", PropValue::RValue(25.25))
+                    ]
+                ),
+                (
+                    "group2",
+                    vec!["I4"],
+                    Some(4000),
+                    None,
+                    None,
+                    GroupRegion::NewDefined(((0, 0), (100, 100))),
+                    vec![],
+                ),
+                (
+                    "region2",
+                    vec!["I7", "I8"],
+                    None,
+                    None,
+                    None,
+                    GroupRegion::PreDefined("region2"),
+                    vec![],
+                ),
+            ]
+        );
+    }
+}
