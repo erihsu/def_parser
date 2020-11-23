@@ -1,7 +1,7 @@
 // nom
 use nom::bytes::complete::tag;
 use nom::multi::many0;
-use nom::sequence::{delimited, terminated, tuple};
+use nom::sequence::{delimited, preceded, terminated, tuple};
 use nom::IResult;
 
 // def
@@ -27,8 +27,51 @@ pub fn slot_section(
 
 fn slot_member(input: &str) -> IResult<&str, Slot> {
     delimited(
-        tag("LAYER"),
-        tuple((tstring, many0(rect_or_polygon))),
+        tag("-"),
+        tuple((preceded(ws(tag("LAYER")), tstring), many0(rect_or_polygon))),
         ws(tag(";")),
     )(input)
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::def_parser::def_types::*;
+    use crate::def_parser::slot_parser::*;
+    use std::io::Read;
+
+    #[test]
+    fn test_slot_section() {
+        let mut input_def = std::fs::File::open("tests/slot_test.def").unwrap();
+        let mut data = String::new();
+        input_def.read_to_string(&mut data).unwrap();
+        let result = slot_section(&data).unwrap();
+
+        let slot_section = result.1;
+
+        let num = slot_section.0;
+        let slots = slot_section.1;
+
+        assert_eq!(num, 3);
+        assert_eq!(
+            slots,
+            vec![
+                ("M1", vec![Geometry::Rect(((3, 3), (6, 8)))],),
+                (
+                    "M2",
+                    vec![
+                        Geometry::Rect(((3, 3), (6, 8))),
+                        Geometry::Polygon(vec![
+                            (0, 0),
+                            (0, 10),
+                            (10, 10),
+                            (10, 20),
+                            (20, 20),
+                            (20, 0)
+                        ])
+                    ],
+                ),
+                ("M3", vec![Geometry::Rect(((3, 3), (6, 8)))])
+            ]
+        );
+    }
 }

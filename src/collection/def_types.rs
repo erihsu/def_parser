@@ -22,19 +22,19 @@ pub enum Geometry {
 pub type Pts = Vec<(i32, i32)>;
 // NONDEFAULTRULES
 pub type Ndr<'a> = (
-    &'a str, // nondefault layer name
+    &'a str, // ndr name
     bool,    // whether hardspacing
     Vec<(
         // Layer rule.
         &'a str, // layer name
-        i32,     // width. integer
-        i32,     // diagwidth. integer
-        i32,     // spacing. integer
-        i32,     // wireext. integer
+        f64,     // width. integer
+        f64,     // diagwidth. integer
+        f64,     // spacing. integer
+        f64,     // wireext. integer
     )>,
-    Vec<&'a str>,   // VIA. specifiy previous vias to use this rule
-    &'a str,        // VIARULE.
-    (&'a str, i32), // minCuts. specifiy the minimuum number of cuts allowed for via using this cut layer
+    Vec<&'a str>, // VIA. specifiy previous vias to use this rule
+    Vec<&'a str>, // VIARULE.
+    Vec<(&'a str, i32)>, // minCuts. specifiy the minimuum number of cuts allowed for via using this cut layer
     Properties<'a>,
 );
 

@@ -1,0 +1,45 @@
+NONDEFAULTRULES 1 ;
+- DEFAULT
+  + LAYER METAL1
+      WIDTH 10.1
+      DIAGWIDTH 8.01
+      SPACING 2.2
+      WIREEXT 1.1
+  + LAYER M2
+      WIDTH 10.1
+      SPACING 2.2
+  + LAYER M3
+      WIDTH 11.1
+      SPACING 3.2
+  + VIA M1_M2
+  + VIA M2_M3
+  + VIARULE VIAGEN12
+  + MINCUTS V1 2
+  + PROPERTY strprop "aString" 
+  + PROPERTY intprop 1 
+  + PROPERTY realprop 1.1 
+  + PROPERTY intrangeprop 25
+  + PROPERTY realrangeprop 25.25 ;
+- RULE2
+  + HARDSPACING 
+  + LAYER METAL1
+      WIDTH 10.1
+      DIAGWIDTH 8.01
+      SPACING 2.2
+      WIREEXT 1.1
+  + LAYER M2
+      WIDTH 10.1
+      SPACING 2.2
+  + LAYER M3
+      WIDTH 11.1
+      SPACING 3.2
+  + VIA M1_M2
+  + VIA M2_M3
+  + VIARULE VIAGEN12
+  + MINCUTS V1 2
+  + PROPERTY strprop "aString" 
+  + PROPERTY intprop 1 
+  + PROPERTY realprop 1.1 
+  + PROPERTY intrangeprop 25
+  + PROPERTY realrangeprop 25.25 ;
+END NONDEFAULTRULES
