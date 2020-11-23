@@ -32,3 +32,52 @@ fn pinproperty_member(input: &str) -> IResult<&str, Pinprop> {
         ws(tag(";")),
     )(input)
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::def_parser::def_types::*;
+    use crate::def_parser::pinproperty_parser::*;
+    use std::io::Read;
+
+    #[test]
+    fn test_pinprop_section() {
+        let mut input_def = std::fs::File::open("tests/pinprop_test.def").unwrap();
+        let mut data = String::new();
+        input_def.read_to_string(&mut data).unwrap();
+        let result = pinproperty_section(&data).unwrap();
+
+        let pinproperty_section = result.1;
+
+        let num = pinproperty_section.0;
+        let pinprops = pinproperty_section.1;
+
+        assert_eq!(num, 2);
+        assert_eq!(
+            pinprops,
+            vec![
+                (
+                    None,
+                    "P0",
+                    vec![
+                        ("strprop", PropValue::SValue("\"aString\"")),
+                        ("intprop", PropValue::IValue(1)),
+                        ("realprop", PropValue::RValue(1.1)),
+                        ("intrangeprop", PropValue::IValue(25)),
+                        ("realrangeprop", PropValue::RValue(25.25))
+                    ]
+                ),
+                (
+                    Some("I1"),
+                    "A",
+                    vec![
+                        ("strprop", PropValue::SValue("\"aString\"")),
+                        ("intprop", PropValue::IValue(1)),
+                        ("realprop", PropValue::RValue(1.1)),
+                        ("intrangeprop", PropValue::IValue(25)),
+                        ("realrangeprop", PropValue::RValue(25.25))
+                    ]
+                )
+            ]
+        );
+    }
+}

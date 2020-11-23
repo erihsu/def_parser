@@ -1,0 +1,21 @@
+BLOCKAGES 8 ;
+    - LAYER METAL1 + MASK 1
+        RECT ( 60 70 ) ( 80 90 ) ;
+    - LAYER M2 + SLOTS + PUSHDOWN + EXCEPTPGNET + COMPONENT I1 + MASK 3
+        POLYGON ( 100 100 ) ( 100 200 ) ( 150 200 ) ( 150 150 ) ( 200 150 ) ( 200 100 ) ;
+    - LAYER M2 + SLOTS + MASK 2
+        RECT ( 10 20 ) ( 40 50 ) ;
+    - LAYER M1 + PUSHDOWN + SPACING 3 + MASK 1
+        RECT ( 50 30 ) ( 55 40 ) ;
+    - LAYER M1 + EXCEPTPGNET + DESIGNRULEWIDTH 45 + MASK 1
+        RECT ( 50 30 ) ( 55 40 ) ;
+    - PLACEMENT                       
+        RECT ( -15 0 ) ( 0  20 )
+        RECT ( -10 -15 ) ( 50 0 ) ;  
+    - PLACEMENT + PARTIAL 0.40 + PUSHDOWN + COMPONENT I1 
+        RECT ( -10 0 ) ( 0  20 )
+        RECT ( -10 -5 ) ( 50 0 ) ; 
+    - PLACEMENT + SOFT
+        RECT ( 50 30 ) ( 55 40 ) ;
+
+END BLOCKAGES

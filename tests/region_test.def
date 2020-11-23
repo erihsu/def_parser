@@ -1,0 +1,11 @@
+REGIONS 2 ;
+- region1 ( -500 -500 ) ( 300 100 ) ( 500 500 ) ( 1000 1000 )
+  + TYPE FENCE
+  + PROPERTY strprop "aString" 
+  + PROPERTY intprop 1 
+  + PROPERTY realprop 1.1 
+  + PROPERTY intrangeprop 25
+  + PROPERTY realrangeprop 25.25 ;
+- region2 ( 4000 0 ) ( 5000 1000 )
+  + TYPE GUIDE ;
+END REGIONS

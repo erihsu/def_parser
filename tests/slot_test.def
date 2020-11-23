@@ -1,0 +1,9 @@
+SLOTS 3 ;
+  -  LAYER M1
+        RECT ( 3 3 )  ( 6 8 ) ;
+  -  LAYER M2
+        RECT ( 3 3 )  ( 6 8 )
+        POLYGON ( 0 0 ) ( 0 10 ) ( 10 10 ) ( 10 20 ) ( 20 20 ) ( 20 0 ) ;
+  -  LAYER M3
+        RECT ( 3 3 )  ( 6 8 ) ;
+END SLOTS  

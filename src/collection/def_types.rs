@@ -22,19 +22,19 @@ pub enum Geometry {
 pub type Pts = Vec<(i32, i32)>;
 // NONDEFAULTRULES
 pub type Ndr<'a> = (
-    &'a str, // nondefault layer name
+    &'a str, // ndr name
     bool,    // whether hardspacing
     Vec<(
         // Layer rule.
         &'a str, // layer name
-        i32,     // width. integer
-        i32,     // diagwidth. integer
-        i32,     // spacing. integer
-        i32,     // wireext. integer
+        f64,     // width. integer
+        f64,     // diagwidth. integer
+        f64,     // spacing. integer
+        f64,     // wireext. integer
     )>,
-    Vec<&'a str>,   // VIA. specifiy previous vias to use this rule
-    &'a str,        // VIARULE.
-    (&'a str, i32), // minCuts. specifiy the minimuum number of cuts allowed for via using this cut layer
+    Vec<&'a str>,        // VIA. specifiy previous vias to use this rule
+    Vec<&'a str>,        // VIARULE.
+    Vec<(&'a str, i32)>, // minCuts. specifiy the minimuum number of cuts allowed for via using this cut layer
     Properties<'a>,
 );
 
@@ -117,19 +117,19 @@ pub enum Fill<'a> {
 }
 
 // BLOCKAGE
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Blockage<'a> {
     Layer(
         (
             &'a str,
             (
+                bool, // SLOTS. Whether creates a blockage on the specified layer where slots cannot be placed.
+                bool, // PUSHDOWN. Specifies that whether the blockage was pushed down into the block from the top level of the design.
+                bool, // FILLS. Whether creates a blockage on the specified layer where metal fills cannot be placed.
+                bool, // EXCEPTPGNET. Indicates that whether the blockage only blocks signal net routing, and does not block power or ground net routing.
                 Option<i32>, // SPACING or DESIGNRULEWIDTH. minimum spacing allowed between the blockage and any other routing shape
                 Option<&'a str>, // COMPONENT. component with which to associate a blockage.
-                bool, // SLOTS. Whether creates a blockage on the specified layer where slots cannot be placed.
-                bool, // FILLS. Whether creates a blockage on the specified layer where metal fills cannot be placed.
-                bool, // PUSHDOWN. Specifies that whether the blockage was pushed down into the block from the top level of the design.
-                bool, // EXCEPTPGNET. Indicates that whether the blockage only blocks signal net routing, and does not block power or ground net routing.
-                i32,  // MASK.
+                Option<i32>, // MASK.
             ),
             Vec<Geometry>,
         ),
@@ -137,10 +137,10 @@ pub enum Blockage<'a> {
     Placement(
         (
             (
-                Option<&'a str>, // COMPONENT. component with which to associate a blockage.
-                bool, //PUSHDOWN. Specifies that whether the blockage was pushed down into the block from the top level of the design.
                 bool, //SOFT. Indicates that whether the initial placement should not use the area, but later phases, such as timing optimization or clock tree synthesis, can use the blockage area.
                 Option<f64>, // PARTIAL. Indicates that the initial placement should not use more than partial percentage of the blockage area for standard cells.
+                bool, //PUSHDOWN. Specifies that whether the blockage was pushed down into the block from the top level of the design.
+                Option<&'a str>, // COMPONENT. component with which to associate a blockage.
             ),
             Vec<Geometry>,
         ),

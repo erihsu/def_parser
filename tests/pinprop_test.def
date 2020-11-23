@@ -1,0 +1,14 @@
+PINPROPERTIES 2 ;
+- PIN P0
+  + PROPERTY strprop "aString" 
+  + PROPERTY intprop 1 
+  + PROPERTY realprop 1.1 
+  + PROPERTY intrangeprop 25
+  + PROPERTY realrangeprop 25.25 ;
+- I1 A 
+  + PROPERTY strprop "aString" 
+  + PROPERTY intprop 1 
+  + PROPERTY realprop 1.1 
+  + PROPERTY intrangeprop 25
+  + PROPERTY realrangeprop 25.25 ;
+END PINPROPERTIES
