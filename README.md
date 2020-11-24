@@ -37,5 +37,5 @@ END DESIGN statement
 **Notes**: `[]` around section means that the section in DEF is optional. For more details of each section definition, please refer to the [lef/def reference](http://www.ispd.cc/contests/18/lefdefref.pdf).
 
 ## Limitation
-Each statement should keep the same order as description in def/lef reference. And you should make sure each statement definition keep same pattern with our [def_types](def_parser/src/collection/def_types.rs)
+Each statement should keep the same order as description in def/lef reference. And you should make sure each statement definition keep same pattern with our [def_types](src/collection/def_types.rs)
 
