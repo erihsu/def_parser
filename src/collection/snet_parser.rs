@@ -9,7 +9,7 @@ use nom::IResult;
 
 // def
 use crate::def_parser::base::{float, number, tstring, ws};
-use crate::def_parser::common::{net_property, routing_point};
+use crate::def_parser::common::{net_property, route_body};
 use crate::def_parser::def_types::{SNet, SpecialWireBasic, WireOption, WireShape};
 
 pub fn snet_section(input: &str) -> IResult<&str, (i32, Vec<SNet>)> {
@@ -53,9 +53,9 @@ fn snet_member(input: &str) -> IResult<&str, SNet> {
 
 fn special_wire_option(input: &str) -> IResult<&str, WireOption> {
     alt((
-        map(ws(tag("+ COVER")), |res: &str| WireOption::Cover(true)),
-        map(ws(tag("+ FIXED")), |res: &str| WireOption::Fixed(true)),
-        map(ws(tag("+ Routed")), |res: &str| WireOption::Routed(true)),
+        map(ws(tag("+ COVER")), |_| WireOption::Cover(true)),
+        map(ws(tag("+ FIXED")), |_| WireOption::Fixed(true)),
+        map(ws(tag("+ Routed")), |_| WireOption::Routed(true)),
         map(pair(ws(tag("+ Shield")), tstring), |res: (&str, &str)| {
             WireOption::Shield(res.1)
         }),
@@ -66,18 +66,18 @@ fn special_wire_shape(input: &str) -> IResult<&str, WireShape> {
     preceded(
         ws(tag("+ SHAPE")),
         alt((
-            map(tag("RING"), |res: &str| WireShape::Ring),
-            map(tag("PADRING"), |res: &str| WireShape::PadRing),
-            map(tag("BLOCKRING"), |res: &str| WireShape::BlockRing),
-            map(tag("STRIPE"), |res: &str| WireShape::Stripe),
-            map(tag("FOLLOWPIN"), |res: &str| WireShape::FollowPin),
-            map(tag("IOWIRE"), |res: &str| WireShape::IOWire),
-            map(tag("COREWIRE"), |res: &str| WireShape::CoreWire),
-            map(tag("BlOCKWIRE"), |res: &str| WireShape::BlockWire),
-            map(tag("BLOCKAGEWIRE"), |res: &str| WireShape::BlockageWire),
-            map(tag("FILLWIRE"), |res: &str| WireShape::FillWire),
-            map(tag("FILLWIREOPC"), |res: &str| WireShape::FillWireOpc),
-            map(tag("DRCFILL"), |res: &str| WireShape::DrcFill),
+            map(tag("RING"), |_| WireShape::Ring),
+            map(tag("PADRING"), |_| WireShape::PadRing),
+            map(tag("BLOCKRING"), |_| WireShape::BlockRing),
+            map(tag("STRIPE"), |_| WireShape::Stripe),
+            map(tag("FOLLOWPIN"), |_| WireShape::FollowPin),
+            map(tag("IOWIRE"), |_| WireShape::IOWire),
+            map(tag("COREWIRE"), |_| WireShape::CoreWire),
+            map(tag("BlOCKWIRE"), |_| WireShape::BlockWire),
+            map(tag("BLOCKAGEWIRE"), |_| WireShape::BlockageWire),
+            map(tag("FILLWIRE"), |_| WireShape::FillWire),
+            map(tag("FILLWIREOPC"), |_| WireShape::FillWireOpc),
+            map(tag("DRCFILL"), |_| WireShape::DrcFill),
         )),
     )(input)
 }
@@ -88,7 +88,7 @@ fn special_wire_basic(input: &str) -> IResult<&str, SpecialWireBasic> {
         tuple((tstring, number)),
         opt(special_wire_shape),
         opt(preceded(ws(tag("+ STYLE")), number)),
-        routing_point,
+        route_body,
     ))(input)
 }
 

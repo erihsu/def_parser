@@ -163,47 +163,56 @@ pub type Component<'a> = (
 
 // NET
 
-#[derive(Debug)]
-pub enum RoutingPoint<'a> {
-    Pt((i32, i32, Option<i32>)),
+#[derive(Debug, PartialEq)]
+pub enum RouteElem<'a> {
+    Pt(RtPt<'a>),
     Via(
         (
-            &'a str,     // viaName
-            Option<i32>, // orient
+            RtPt<'a>,
+            &'a str, // viaName
         ),
     ),
 }
 
+pub type RtPt<'a> = (Option<i32>, Option<i32>, Option<i32>);
+
+pub type RouteBody<'a> = Vec<RouteElem<'a>>;
+
 pub type RegularWireBasic<'a> = (
-    Option<i32>,           // 0: cover; 1: fixed; 2: routed; 3: noshield
-    &'a str,               // layer name
-    Option<&'a str>,       // TAPERRULE
-    Option<i32>,           // stylNum,
-    Vec<RoutingPoint<'a>>, // routing points
+    &'a str,         // layer name
+    Option<&'a str>, // TAPERRULE
+    Option<i32>,     // stylNum,
+    RouteBody<'a>,
 );
+
+pub type RegularWireStmt<'a> = Vec<(
+    Option<i32>, // 0: cover; 1: fixed; 2: routed; 3: noshield
+    Vec<RegularWireBasic<'a>>,
+)>;
 
 pub type Net<'a> = (
     (&'a str, bool),               // netName, whether mustjoin
     Vec<(&'a str, &'a str, bool)>, // componentName, pinName, whether pin from PIN macro.
     Vec<&'a str>,                  // SHIELDNET
-    Vec<(
-        // VPIN
-        &'a str,                  // vpin name
-        Option<&'a str>,          // layer name
-        ((i32, i32), (i32, i32)), // vpin geometry
-        Option<i32>,              // 0: placed ; 1: fixed ; 2: covered
-        Option<(i32, i32)>,       // vpin location
-        Option<i32>,              // orient
-    )>,
-    Vec<(
-        // SUBNET
-        &'a str,                                                   // subnet name
-        Vec<(&'a str, &'a str)>,                                   // pinname or vpin name
-        Option<&'a str>,                                           // nondefaultrule
-        Option<(RegularWireBasic<'a>, Vec<RegularWireBasic<'a>>)>, // regular wiring
-    )>,
-    Option<i32>, //XTALK
-    Option<i32>, // FREQUENCY
+    // Vec<(
+    //     // VPIN
+    //     &'a str,                  // vpin name
+    //     Option<&'a str>,          // layer name
+    //     ((i32, i32), (i32, i32)), // vpin geometry
+    //     Option<i32>,              // 0: placed ; 1: fixed ; 2: covered
+    //     Option<(i32, i32)>,       // vpin location
+    //     Option<i32>,              // orient
+    // )>,
+    // Vec<(
+    //     // SUBNET
+    //     &'a str,                                                   // subnet name
+    //     Vec<(&'a str, &'a str)>,                                   // pinname or vpin name
+    //     Option<&'a str>,                                           // nondefaultrule
+    //     Option<(RegularWireBasic<'a>, Vec<RegularWireBasic<'a>>)>, // regular wiring
+    // )>,
+    Option<i32>,     //XTALK
+    Option<&'a str>, // NONDEFAULTRULE
+    // RegularWireStmt<'a>,
     NetProperty<'a>,
 );
 
@@ -238,7 +247,7 @@ pub type SpecialWireBasic<'a> = (
     (&'a str, i32),
     Option<WireShape>,
     Option<i32>,
-    Vec<RoutingPoint<'a>>,
+    RouteBody<'a>,
 );
 
 pub type SNet<'a> = (
@@ -253,6 +262,7 @@ pub type SNet<'a> = (
 pub type NetProperty<'a> = (
     Option<i32>,     //SOURCE. 0: DIST; 1: NETLIST; 2:TEST; 3:TIMING; 4:USER
     bool,            // FIXEDBUMP
+    Option<i32>,     // FREQUENCY
     Option<&'a str>, // ORIGINAL
     Option<i32>, // USE. 0: ANALOG; 1:CLOCK; 2:GROUND; 3:POWER; 4:RESET; 5: SCAN; 6:SIGNAL; 7: TIEOFF
     Option<i32>, // PATTERN. 0: BALANCED; 1:STEINER; 2:TRUNK; 3:WIREDLOGIC

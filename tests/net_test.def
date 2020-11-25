@@ -1,27 +1,7 @@
 NETS 6 ;
-- SCAN ( scancell1 PA10 + SYNTHESIZED ) ( scancell2 PA2 + SYNTHESIZED )
-  + SOURCE TEST ;
 - N1 ( I1 A ) ( PIN P0 )
   + SHIELDNET SN1
   + SHIELDNET VDD
-  + FIXED M3 ( 10 0 ) MASK 3 ( 10 20 ) MASK 031 M1_M2
-  + ROUTED M1 ( 0 0 ) ( 5 0 ) VIRTUAL ( 2 3 ) MASK 1 ( 7 7 )
-  + ROUTED M1 ( 0 0 ) ( 5 0 ) VIRTUAL ( 2 3 ) RECT ( 1 2 3 4 ) ( 7 7 )
-  + FIXED M1 ( 0 0 ) ( 5 0 ) ( 7 7 ) 
-  + FIXED M1 ( 0 0 ) ( 5 0 ) MASK 3 RECT ( 1 2 3 4 ) ( 7 7 ) 
-  + NOSHIELD M2 ( 14100 341440 ) ( 14000 * ) M1_M2
-  + VPIN N1_VP0 LAYER M3 ( -333 -333 ) ( 333 333 ) PLACED ( 189560 27300 ) N
-  + VPIN N1_VP1 LAYER M3 ( -333 -333 ) ( 333 333 ) PLACED ( 189560 27300 ) S
-  + VPIN N1_VP2 LAYER M3 ( -333 -333 ) ( 333 333 ) PLACED ( 189560 27300 ) E
-  + VPIN N1_VP3 LAYER M3 ( -333 -333 ) ( 333 333 ) PLACED ( 189560 27300 ) W
-  + VPIN N1_VP4 LAYER M3 ( -333 -333 ) ( 333 333 ) PLACED ( 189560 27300 ) FN
-  + VPIN N1_VP5 LAYER M3 ( -333 -333 ) ( 333 333 ) PLACED ( 189560 27300 ) FS
-  + VPIN N1_VP6 LAYER M3 ( -333 -333 ) ( 333 333 ) PLACED ( 189560 27300 ) FE
-  + VPIN N1_VP7 LAYER M3 ( -333 -333 ) ( 333 333 ) PLACED ( 189560 27300 ) FW
-  + VPIN N1_VP8 ( -333 -333 ) ( 333 333 )
-  + SUBNET N1_SUB0 ( I2 A ) ( PIN P1 ) ( VPIN N1_VP9 )
-    NONDEFAULTRULE RULE1
-    ROUTED M1 ( 168280 63300 700 ) ( * 64500 ) M1_M2 ( 169400 * 800 ) M2_M3
   + XTALK 2
   + NONDEFAULTRULE RULE1
   + ROUTED
@@ -40,47 +20,4 @@ NETS 6 ;
   + PROPERTY realprop 1.1 
   + PROPERTY intrangeprop 25
   + PROPERTY realrangeprop 25.25 ;
-- N2 ( I3 A ) ( PIN P2 )
-  + FIXED
-    M2 ( 14000 341440 ) ( 9600 * ) ( * 282400 ) M1_M2 ( 2400 * )
-    NEW M1 TAPERRULE RULE1 ( 2400 282400 ) ( 240 * )
-  + SOURCE DIST
-  + PATTERN BALANCED
-  + WEIGHT 500 ;
-- N3 ( I4 A ) ( PIN P3 )
-  + COVER
-    M2 ( 14000 341440 ) ( 9600 * ) ( * 282400 ) M1_M2 ( 2400 * ) VIAGEN12_0 N
-    NEW M1 ( 2400 282400 ) ( 240 * )
-    NEW M2 ( 400 400 ) M1_M2 N ( * * )           # case : pt via ( * * )
-    NEW M2 ( 500 500 ) M1_M2 ( * * ) M1_M2     # case : pt via ( * * ) via
-    NEW M2 ( 600 600 10 ) M1_M2 S ( * * 30 ) ( * 800 )    # case : pt via ( * * ext ) 
-    NEW M2 ( 700 700 ) M1_M2 ( * * ) ( * 800 ) # case : pt via ( * * ) pt
-    NEW M1 ( 0 0 ) M1_M2 FS M2_M3
-    NEW M3 ( 0 0 ) M2_M3 W M1_M2
-    NEW M1 ( 10 10 ) ( 20 10 ) MASK 1 ( 20 20 ) MASK 031 VIA1_2
-  + SOURCE USER
-  + PATTERN TRUNK ;
-- N4 ( I5 A ) ( PIN P4 )
-  + SOURCE TEST
-  + ROUTED M2 STYLE 1 ( 0 0 ) ( 150 150 ) ( 300 0 ) ( 400 0 )
-  + ROUTED M1 ( 150 150 ) MASK 3 ( 300 300 ) MASK 032 VIAGEN12
-  + NOSHIELD M1 ( 150 150 30 ) ( 150 300 30 )
-  + ROUTED M1 STYLE 0 ( 0 0 ) ( 150 150 )
-    NEW M1 STYLE 1 ( 150 150 ) MASK 2 ( 300 0 ) ( 400 0 )
-  + USE GROUND ;
-- N5 ( I6 A ) ( PIN P5 )
-  + ROUTED M2 STYLE 3 ( 0 1000 ) ( 150 1150 ) ( 300 1000 ) ( 400 1000 )
-  + ROUTED M1 ( 0 1000 ) ( 150 1150 ) ( 300 1000 ) ( 400 1000 )
-  + SOURCE TIMING ;
-- N6
-  + NONDEFAULTRULE RULE2
-  + ROUTED M1 STYLE 4 ( 1000 0 ) ( 1100 100 )
-  + ROUTED M1 STYLE 4 ( 1200 100 ) ( 1300 0 )
-  + ROUTED M1 STYLE 4 ( 1000 -100 ) ( 1300 -100 ) ;
-- SCAN ( scancell1 PA10 + SYNTHESIZED ) ( scancell2 PA2 + SYNTHESIZED )
-  + SOURCE TEST ;
-- MUSTJOIN_1 ( I7 A ) ;
-- ARRAYNET[0][10] ;
-- vectormodule[1]/vectornet[0] ;
-- vectormodule[1]/scalarnet ;
 END NETS

@@ -13,7 +13,9 @@ use nom::IResult;
 use std::str;
 
 use crate::def_parser::base::{float, number, number_str, qstring, tstring, ws};
-use crate::def_parser::def_types::{Geometry, NetProperty, PropValue, Properties, RoutingPoint};
+use crate::def_parser::def_types::{
+    Geometry, NetProperty, PropValue, Properties, RouteBody, RouteElem, RtPt,
+};
 
 // common parser used in def_parser. These parser are very commonly used in def_parser so collect them together.
 
@@ -65,13 +67,13 @@ pub fn pt_new(input: &str) -> IResult<&str, (i32, i32)> {
 }
 
 // routing pt
-pub fn rtpt(input: &str) -> IResult<&str, (&str, &str, Option<&str>)> {
+pub fn rtpt(input: &str) -> IResult<&str, RtPt> {
     delimited(
         ws(tag("(")),
         tuple((
-            alt((ws(tag("*")), number_str)),
-            alt((ws(tag("*")), number_str)),
-            opt(number_str),
+            alt((map(ws(tag("*")), |_| None), map(number, |n| Some(n)))),
+            alt((map(ws(tag("*")), |_| None), map(number, |n| Some(n)))),
+            opt(number),
         )),
         ws(tag(")")),
     )(input)
@@ -205,6 +207,7 @@ pub fn net_property(input: &str) -> IResult<&str, NetProperty> {
             Some(_) => true,
             None => false,
         }),
+        opt(preceded(ws(tag("+ FREQUENCY")), number)),
         opt(preceded(ws(tag("+ ORIGINAL")), tstring)),
         map(preceded(ws(tag("+ USE")), tstring), |res: &str| match res {
             "ANALOG" => Some(0),
@@ -234,19 +237,10 @@ pub fn net_property(input: &str) -> IResult<&str, NetProperty> {
 }
 
 // Routing point
-pub fn routing_point(input: &str) -> IResult<&str, Vec<RoutingPoint>> {
+pub fn route_body(input: &str) -> IResult<&str, RouteBody> {
     many0(alt((
-        map(
-            delimited(
-                ws(tag("(")),
-                tuple((number, number, opt(number))),
-                ws(tag(")")),
-            ),
-            |res: (i32, i32, Option<i32>)| RoutingPoint::Pt(res),
-        ),
-        map(pair(tstring, opt(orient)), |res: (&str, Option<i32>)| {
-            RoutingPoint::Via(res)
-        }),
+        map(pair(rtpt, tstring), |res| RouteElem::Via(res)),
+        map(rtpt, |res| RouteElem::Pt(res)),
     )))(input)
 }
 
@@ -295,6 +289,65 @@ mod tests {
                     ("intrangeprop", PropValue::IValue(25)),
                     ("realrangeprop", PropValue::RValue(25.25))
                 ]
+            )
+        );
+    }
+
+    #[test]
+    fn test_route_body() {
+        assert_eq!(
+            route_body("( 14000 341440 ) ( 9600 * ) ( * 282400 ) M1_M2 ( 2400 * ) VIAGEN12_0")
+                .unwrap(),
+            (
+                "",
+                vec![
+                    RouteElem::Pt((Some(14000), Some(341440), None)),
+                    RouteElem::Pt((Some(9600), None, None)),
+                    RouteElem::Via(((None, Some(282400), None), "M1_M2")),
+                    RouteElem::Via(((Some(2400), None, None), "VIAGEN12_0")),
+                ]
+            )
+        );
+    }
+
+    #[test]
+    fn test_net_property() {
+        assert_eq!(
+            net_property(
+                "  + SOURCE NETLIST
+  + FIXEDBUMP
+  + FREQUENCY 100
+  + ORIGINAL N2
+  + USE SIGNAL
+  + PATTERN STEINER
+  + ESTCAP 1500000
+  + WEIGHT 100
+  + PROPERTY strprop \"aString\" 
+  + PROPERTY intprop 1 
+  + PROPERTY realprop 1.1 
+  + PROPERTY intrangeprop 25
+  + PROPERTY realrangeprop 25.25 "
+            )
+            .unwrap(),
+            (
+                "",
+                (
+                    Some(1),
+                    true,
+                    Some(100),
+                    Some("N2"),
+                    Some(6),
+                    Some(1),
+                    Some(1500000),
+                    Some(100),
+                    vec![
+                        ("strprop", PropValue::SValue("\"aString\"")),
+                        ("intprop", PropValue::IValue(1)),
+                        ("realprop", PropValue::RValue(1.1)),
+                        ("intrangeprop", PropValue::IValue(25)),
+                        ("realrangeprop", PropValue::RValue(25.25))
+                    ]
+                )
             )
         );
     }
