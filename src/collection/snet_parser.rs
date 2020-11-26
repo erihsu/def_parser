@@ -1,16 +1,20 @@
 // nom
-use nom::branch::alt;
+use nom::branch::{alt, permutation};
 use nom::bytes::complete::tag;
 use nom::combinator::{map, opt};
-use nom::multi::many0;
-use nom::sequence::pair;
+use nom::multi::{many0, many1};
+
 use nom::sequence::{delimited, preceded, terminated, tuple};
 use nom::IResult;
 
 // def
 use crate::def_parser::base::{float, number, tstring, ws};
-use crate::def_parser::common::{net_property, route_body};
-use crate::def_parser::def_types::{SNet, SpecialWireBasic, WireOption, WireShape};
+use crate::def_parser::common::{properties, route_body};
+use crate::def_parser::def_types::{SNet, SNetProperty, SpecialWireBasic, SpecialWireStmt};
+use crate::def_parser::encoder::{
+    net_pattern_encode, snet_global_attribute_encode, snet_shape_encode, source_type_encode,
+    use_mode_encode,
+};
 
 pub fn snet_section(input: &str) -> IResult<&str, (i32, Vec<SNet>)> {
     delimited(
@@ -44,57 +48,59 @@ fn snet_member(input: &str) -> IResult<&str, SNet> {
                 ws(tag(")")),
             )),
             opt(preceded(ws(tag("+ VOLTAGE")), float)),
-            opt(special_wiring),
-            net_property,
+            special_wiring,
+            snet_property,
         )),
         ws(tag(";")),
     )(input)
 }
 
-fn special_wire_option(input: &str) -> IResult<&str, WireOption> {
-    alt((
-        map(ws(tag("+ COVER")), |_| WireOption::Cover(true)),
-        map(ws(tag("+ FIXED")), |_| WireOption::Fixed(true)),
-        map(ws(tag("+ Routed")), |_| WireOption::Routed(true)),
-        map(pair(ws(tag("+ Shield")), tstring), |res: (&str, &str)| {
-            WireOption::Shield(res.1)
-        }),
-    ))(input)
-}
-
-fn special_wire_shape(input: &str) -> IResult<&str, WireShape> {
-    preceded(
-        ws(tag("+ SHAPE")),
-        alt((
-            map(tag("RING"), |_| WireShape::Ring),
-            map(tag("PADRING"), |_| WireShape::PadRing),
-            map(tag("BLOCKRING"), |_| WireShape::BlockRing),
-            map(tag("STRIPE"), |_| WireShape::Stripe),
-            map(tag("FOLLOWPIN"), |_| WireShape::FollowPin),
-            map(tag("IOWIRE"), |_| WireShape::IOWire),
-            map(tag("COREWIRE"), |_| WireShape::CoreWire),
-            map(tag("BlOCKWIRE"), |_| WireShape::BlockWire),
-            map(tag("BLOCKAGEWIRE"), |_| WireShape::BlockageWire),
-            map(tag("FILLWIRE"), |_| WireShape::FillWire),
-            map(tag("FILLWIREOPC"), |_| WireShape::FillWireOpc),
-            map(tag("DRCFILL"), |_| WireShape::DrcFill),
-        )),
-    )(input)
+fn special_wire_shape(input: &str) -> IResult<&str, i32> {
+    map(preceded(ws(tag("+ SHAPE")), tstring), |res| {
+        snet_shape_encode(res).unwrap()
+    })(input)
 }
 
 fn special_wire_basic(input: &str) -> IResult<&str, SpecialWireBasic> {
     tuple((
-        opt(special_wire_option),
-        tuple((tstring, number)),
+        tstring,
+        number,
         opt(special_wire_shape),
         opt(preceded(ws(tag("+ STYLE")), number)),
         route_body,
     ))(input)
 }
 
-fn special_wiring(input: &str) -> IResult<&str, (SpecialWireBasic, Vec<SpecialWireBasic>)> {
-    tuple((
-        special_wire_basic,
-        many0(preceded(ws(tag("NEW")), special_wire_basic)),
+fn special_wiring(input: &str) -> IResult<&str, SpecialWireStmt> {
+    many0(tuple((
+        map(preceded(ws(tag("+")), tstring), |res| {
+            snet_global_attribute_encode(res).unwrap()
+        }),
+        many1(alt((
+            preceded(ws(tag("NEW")), special_wire_basic),
+            special_wire_basic,
+        ))),
+    )))(input)
+}
+
+fn snet_property(input: &str) -> IResult<&str, SNetProperty> {
+    permutation((
+        map(preceded(ws(tag("+ SOURCE")), tstring), |res| {
+            source_type_encode(res).unwrap()
+        }),
+        map(opt(ws(tag("+ FIXEDBUMP"))), |res: Option<&str>| match res {
+            Some(_) => true,
+            None => false,
+        }),
+        opt(preceded(ws(tag("+ ORIGINAL")), tstring)),
+        map(preceded(ws(tag("+ USE")), tstring), |res| {
+            use_mode_encode(res).unwrap()
+        }),
+        map(preceded(ws(tag("+ PATTERN")), tstring), |res| {
+            net_pattern_encode(res).unwrap()
+        }),
+        opt(preceded(ws(tag("+ ESTCAP")), number)),
+        opt(preceded(ws(tag("+ WEIGHT")), number)),
+        properties,
     ))(input)
 }

@@ -1,6 +1,9 @@
 #[path = "collection/base.rs"]
 mod base;
 
+#[path = "collection/encoder.rs"]
+mod encoder;
+
 #[path = "collection/common.rs"]
 mod common;
 
@@ -45,3 +48,9 @@ mod net_parser;
 
 #[path = "collection/snet_parser.rs"]
 mod snet_parser;
+
+#[path = "collection/pin_parser.rs"]
+mod pin_parser;
+
+#[path = "collection/scanchain_parser.rs"]
+mod scanchain_parser;

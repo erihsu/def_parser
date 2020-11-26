@@ -186,86 +186,79 @@ pub type RegularWireBasic<'a> = (
 );
 
 pub type RegularWireStmt<'a> = Vec<(
-    Option<i32>, // 0: cover; 1: fixed; 2: routed; 3: noshield
+    i32, // 0: cover; 1: fixed; 2: routed; 3: noshield
     Vec<RegularWireBasic<'a>>,
 )>;
 
 pub type Net<'a> = (
-    (&'a str, bool),               // netName, whether mustjoin
-    Vec<(&'a str, &'a str, bool)>, // componentName, pinName, whether pin from PIN macro.
-    Vec<&'a str>,                  // SHIELDNET
-    // Vec<(
-    //     // VPIN
-    //     &'a str,                  // vpin name
-    //     Option<&'a str>,          // layer name
-    //     ((i32, i32), (i32, i32)), // vpin geometry
-    //     Option<i32>,              // 0: placed ; 1: fixed ; 2: covered
-    //     Option<(i32, i32)>,       // vpin location
-    //     Option<i32>,              // orient
-    // )>,
-    // Vec<(
-    //     // SUBNET
-    //     &'a str,                                                   // subnet name
-    //     Vec<(&'a str, &'a str)>,                                   // pinname or vpin name
-    //     Option<&'a str>,                                           // nondefaultrule
-    //     Option<(RegularWireBasic<'a>, Vec<RegularWireBasic<'a>>)>, // regular wiring
-    // )>,
+    &'a str,                               // netName
+    Vec<(Option<&'a str>, &'a str, bool)>, // componentName, pinName, whether synthesized.
+    Vec<&'a str>,                          // SHIELDNET
+    Vec<(
+        // VPIN
+        &'a str,                  // vpin name
+        Option<&'a str>,          // layer name
+        ((i32, i32), (i32, i32)), // vpin geometry
+        i32,                      // 0: placed ; 1: fixed ; 2: covered
+        Option<(i32, i32)>,       // vpin location
+        Option<i32>,              // orient
+    )>,
+    Vec<(
+        // SUBNET
+        &'a str,                          // subnet name
+        (Option<&'a str>, &'a str, bool), // pinname or vpin name
+        Option<&'a str>,                  // nondefaultrule
+        RegularWireStmt<'a>,              // regular wiring
+    )>,
     Option<i32>,     //XTALK
     Option<&'a str>, // NONDEFAULTRULE
-    // RegularWireStmt<'a>,
+    RegularWireStmt<'a>,
     NetProperty<'a>,
 );
 
 // Special Net
 
-#[derive(Debug)]
-pub enum WireOption<'a> {
-    Cover(bool),
-    Fixed(bool),
-    Routed(bool),
-    Shield(&'a str),
-}
-
-#[derive(Debug)]
-pub enum WireShape {
-    Ring,
-    PadRing,
-    BlockRing,
-    Stripe,
-    FollowPin,
-    IOWire,
-    CoreWire,
-    BlockWire,
-    BlockageWire,
-    FillWire,
-    FillWireOpc,
-    DrcFill,
-}
-
 pub type SpecialWireBasic<'a> = (
-    Option<WireOption<'a>>,
-    (&'a str, i32),
-    Option<WireShape>,
-    Option<i32>,
+    &'a str,     // layer name
+    i32,         // route width
+    Option<i32>, // shape code
+    Option<i32>, // stylNum,
     RouteBody<'a>,
 );
+
+pub type SpecialWireStmt<'a> = Vec<(
+    i32, // 0: cover; 1: fixed; 2: routed; 3: noshield
+    Vec<SpecialWireBasic<'a>>,
+)>;
 
 pub type SNet<'a> = (
     &'a str,                       // special netName
     Vec<(&'a str, &'a str, bool)>, // componentName, pinName, whether pin from PIN macro.
     Option<f64>,                   // volts
-    Option<(SpecialWireBasic<'a>, Vec<SpecialWireBasic<'a>>)>,
-    NetProperty<'a>,
+    SpecialWireStmt<'a>,
+    SNetProperty<'a>,
 );
 
-// NetProperty that commonly used in NET and Special Net
+// NetProperty that used in NET
 pub type NetProperty<'a> = (
-    Option<i32>,     //SOURCE. 0: DIST; 1: NETLIST; 2:TEST; 3:TIMING; 4:USER
+    i32,             //SOURCE. 0: DIST; 1: NETLIST; 2:TEST; 3:TIMING; 4:USER
     bool,            // FIXEDBUMP
     Option<i32>,     // FREQUENCY
     Option<&'a str>, // ORIGINAL
-    Option<i32>, // USE. 0: ANALOG; 1:CLOCK; 2:GROUND; 3:POWER; 4:RESET; 5: SCAN; 6:SIGNAL; 7: TIEOFF
-    Option<i32>, // PATTERN. 0: BALANCED; 1:STEINER; 2:TRUNK; 3:WIREDLOGIC
+    i32, // USE. 0: ANALOG; 1:CLOCK; 2:GROUND; 3:POWER; 4:RESET; 5: SCAN; 6:SIGNAL; 7: TIEOFF
+    i32, // PATTERN. 0: BALANCED; 1:STEINER; 2:TRUNK; 3:WIREDLOGIC
+    Option<i32>, // ESTCAP
+    Option<i32>, // WEIGHT
+    Properties<'a>,
+);
+
+// NetProperty that used in Special Net
+pub type SNetProperty<'a> = (
+    i32,             //SOURCE. 0: DIST; 1: NETLIST; 2:TEST; 3:TIMING; 4:USER
+    bool,            // FIXEDBUMP
+    Option<&'a str>, // ORIGINAL
+    i32, // USE. 0: ANALOG; 1:CLOCK; 2:GROUND; 3:POWER; 4:RESET; 5: SCAN; 6:SIGNAL; 7: TIEOFF
+    i32, // PATTERN. 0: BALANCED; 1:STEINER; 2:TRUNK; 3:WIREDLOGIC
     Option<i32>, // ESTCAP
     Option<i32>, // WEIGHT
     Properties<'a>,
@@ -275,4 +268,81 @@ pub type NetProperty<'a> = (
 pub type Style = (
     i32, // style number
     Pts,
+);
+
+// Pin
+pub type Pin<'a> = (
+    (&'a str, &'a str),          // pinName & netName
+    bool,                        // Whether special
+    i32,                         // direction
+    Option<&'a str>,             // NetExpre
+    Option<&'a str>,             // PowerPin name
+    Option<&'a str>,             // GroundPin name
+    Option<i32>,                 // pin mode
+    Vec<(i32, Option<&'a str>)>, // ANTENNAPINPARTIALMETALAREA
+    Vec<(i32, Option<&'a str>)>, // ANTENNAPINPARTIALMETALSIDEAREA
+    Vec<(i32, Option<&'a str>)>, // ANTENNAPINPARTIALCUTAREA
+    Vec<(i32, Option<&'a str>)>, // ANTENNAPINDIFFAREA
+    Option<i32>,                 // ANTENNAMODEL
+    Vec<(i32, Option<&'a str>)>, // ANTENNAPINGATEAREA
+    Vec<(i32, &'a str)>,         // ANTENNAPINMAXAREACAR
+    Vec<(i32, &'a str)>,         // ANTENNAPINMAXSIDEAREACAR
+    Vec<(i32, &'a str)>,         // ANTENNAPINMAXCUTCAR
+    Ports<'a>,                   //
+);
+
+type Ports<'a> = Vec<Port<'a>>;
+pub type Port<'a> = (
+    Vec<PortElem<'a>>,
+    i32,        // location attribute
+    (i32, i32), // location
+    i32,        // orient
+);
+
+#[derive(Debug)]
+pub enum PortElem<'a> {
+    Layer((&'a str, Option<i32>, ((i32, i32), (i32, i32)))),
+    Polygon((&'a str, Option<i32>, Vec<(i32, i32)>)),
+    Via((&'a str, (i32, i32))),
+}
+
+pub type ScanChain<'a> = (
+    &'a str, // name
+    (
+        Option<(&'a str, i32)>, // partition
+        Option<(
+            &'a str, // IN pin
+            &'a str, // OUT PIN
+        )>, // commonscanpins
+        Option<(
+            Option<&'a str>, // if from component, then has name; whether none
+            &'a str,         // pin name
+        )>, // start.
+        Option<(
+            (
+                &'a str, // scancell
+                &'a str,
+            ), //  in pin
+            (
+                &'a str, // scancell
+                &'a str,
+            ), // out pin
+            i32, // max bits
+        )>, // float
+        Option<(
+            (
+                &'a str, // scancell
+                &'a str, // in pin
+            ),
+            (
+                &'a str, // scancell
+                &'a str, // out pin
+            ),
+            i32, // max bits
+        )>, // ordered
+        Option<(
+            Option<&'a str>, // if from component, then has name; whether none
+            &'a str,         // pin name
+        )>, // stop.
+    ),
 );
