@@ -1,9 +1,9 @@
 // nom
-use nom::branch::alt;
+use nom::branch::{alt, permutation};
 use nom::bytes::complete::tag;
 use nom::combinator::{map, opt};
 use nom::multi::{many0, many1};
-use nom::sequence::{delimited, preceded, terminated, tuple};
+use nom::sequence::{delimited, pair, preceded, terminated, tuple};
 use nom::IResult;
 
 // def
@@ -36,23 +36,24 @@ pub fn group_section(
 fn group_member(input: &str) -> IResult<&str, Group> {
     delimited(
         tag("-"),
-        tuple((
-            tstring,
-            many1(tstring),
-            opt(preceded(tag("+ SOFT MAXHALFPERIMETER"), number)),
-            opt(preceded(tag("MAXX"), number)),
-            opt(preceded(tag("MAXY"), number)),
-            alt((
-                map(preceded(tag("+ REGION"), tstring), |res: &str| {
-                    GroupRegion::PreDefined(res)
-                }),
-                map(
-                    preceded(tag("+ REGION"), rect),
-                    |res: ((i32, i32), (i32, i32))| GroupRegion::NewDefined(res),
-                ),
+        pair(
+            tuple((tstring, many1(tstring))),
+            permutation((
+                opt(preceded(tag("+ SOFT MAXHALFPERIMETER"), number)),
+                opt(preceded(tag("MAXX"), number)),
+                opt(preceded(tag("MAXY"), number)),
+                alt((
+                    map(preceded(tag("+ REGION"), tstring), |res: &str| {
+                        GroupRegion::PreDefined(res)
+                    }),
+                    map(
+                        preceded(tag("+ REGION"), rect),
+                        |res: ((i32, i32), (i32, i32))| GroupRegion::NewDefined(res),
+                    ),
+                )),
+                properties,
             )),
-            properties,
-        )),
+        ),
         ws(tag(";")),
     )(input)
 }
@@ -76,42 +77,36 @@ mod tests {
         let groups = group_section.1;
 
         assert_eq!(num, 3);
+
+        let group_1_feature = (
+            Some(4000),
+            Some(100000),
+            Some(100000),
+            GroupRegion::PreDefined("region1"),
+            vec![
+                ("strprop", PropValue::SValue("\"aString\"")),
+                ("intprop", PropValue::IValue(1)),
+                ("realprop", PropValue::RValue(1.1)),
+                ("intrangeprop", PropValue::IValue(25)),
+                ("realrangeprop", PropValue::RValue(25.25)),
+            ],
+        );
+
+        let group_2_feature = (
+            Some(4000),
+            None,
+            None,
+            GroupRegion::NewDefined(((0, 0), (100, 100))),
+            vec![],
+        );
+        let group_3_feature = (None, None, None, GroupRegion::PreDefined("region2"), vec![]);
+
         assert_eq!(
             groups,
             vec![
-                (
-                    "group1",
-                    vec!["I3", "I2"],
-                    Some(4000),
-                    Some(100000),
-                    Some(100000),
-                    GroupRegion::PreDefined("region1"),
-                    vec![
-                        ("strprop", PropValue::SValue("\"aString\"")),
-                        ("intprop", PropValue::IValue(1)),
-                        ("realprop", PropValue::RValue(1.1)),
-                        ("intrangeprop", PropValue::IValue(25)),
-                        ("realrangeprop", PropValue::RValue(25.25))
-                    ]
-                ),
-                (
-                    "group2",
-                    vec!["I4"],
-                    Some(4000),
-                    None,
-                    None,
-                    GroupRegion::NewDefined(((0, 0), (100, 100))),
-                    vec![],
-                ),
-                (
-                    "region2",
-                    vec!["I7", "I8"],
-                    None,
-                    None,
-                    None,
-                    GroupRegion::PreDefined("region2"),
-                    vec![],
-                ),
+                (("group1", vec!["I3", "I2"],), group_1_feature),
+                (("group2", vec!["I4"],), group_2_feature),
+                (("region2", vec!["I7", "I8"],), group_3_feature),
             ]
         );
     }

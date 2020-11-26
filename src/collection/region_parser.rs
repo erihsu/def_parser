@@ -1,15 +1,16 @@
 // nom
-use nom::branch::alt;
+use nom::branch::permutation;
 use nom::bytes::complete::tag;
-use nom::combinator::{map_res, opt, recognize};
+use nom::combinator::{map, opt};
 use nom::multi::{many0, many1};
-use nom::sequence::{delimited, preceded, terminated, tuple};
+use nom::sequence::{delimited, pair, preceded, terminated, tuple};
 use nom::IResult;
 
 // def
 use crate::def_parser::base::{number, tstring, ws};
 use crate::def_parser::common::{properties, rect};
 use crate::def_parser::def_types::Region;
+use crate::def_parser::encoder::region_type_encode;
 
 pub fn region_section(
     input: &str,
@@ -33,24 +34,19 @@ pub fn region_section(
 fn region_member(input: &str) -> IResult<&str, Region> {
     delimited(
         tag("-"),
-        tuple((
-            tstring,
-            many1(rect),
-            opt(preceded(ws(tag("+ TYPE")), region_type)),
-            properties,
-        )),
+        pair(
+            tuple((
+                tstring, // name
+                many1(rect),
+            )),
+            permutation((
+                opt(map(preceded(ws(tag("+ TYPE")), tstring), |n| {
+                    region_type_encode(n).unwrap()
+                })),
+                properties,
+            )),
+        ),
         ws(tag(";")),
-    )(input)
-}
-
-fn region_type(input: &str) -> IResult<&str, i32> {
-    map_res(
-        recognize(alt((tag("FENCE"), tag("GUIDE")))),
-        |res: &str| match res {
-            "FENCE" => Ok(0),
-            "GUIDE" => Ok(1),
-            _ => Err(0),
-        },
     )(input)
 }
 
@@ -73,22 +69,32 @@ mod tests {
         let regions = region_section.1;
 
         assert_eq!(num, 2);
+
+        let region_1_feature = (
+            Some(0),
+            vec![
+                ("strprop", PropValue::SValue("\"aString\"")),
+                ("intprop", PropValue::IValue(1)),
+                ("realprop", PropValue::RValue(1.1)),
+                ("intrangeprop", PropValue::IValue(25)),
+                ("realrangeprop", PropValue::RValue(25.25)),
+            ],
+        );
+        let region_2_feature = (Some(1), vec![]);
         assert_eq!(
             regions,
             vec![
                 (
-                    "region1",
-                    vec![((-500, -500), (300, 100)), ((500, 500), (1000, 1000))],
-                    Some(0),
-                    vec![
-                        ("strprop", PropValue::SValue("\"aString\"")),
-                        ("intprop", PropValue::IValue(1)),
-                        ("realprop", PropValue::RValue(1.1)),
-                        ("intrangeprop", PropValue::IValue(25)),
-                        ("realrangeprop", PropValue::RValue(25.25))
-                    ]
+                    (
+                        "region1",
+                        vec![((-500, -500), (300, 100)), ((500, 500), (1000, 1000))],
+                    ),
+                    region_1_feature
                 ),
-                ("region2", vec![((4000, 0), (5000, 1000))], Some(1), vec![],),
+                (
+                    ("region2", vec![((4000, 0), (5000, 1000))]),
+                    region_2_feature
+                ),
             ]
         );
     }

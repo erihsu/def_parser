@@ -116,3 +116,11 @@ pub fn pin_antenna_model(input: &str) -> Result<i32, &str> {
         _ => Err("Unsupported Oxide model for pin!"),
     }
 }
+
+pub fn region_type_encode(input: &str) -> Result<i32, &str> {
+    match input {
+        "FENCE" => Ok(0),
+        "GUIDE" => Ok(1),
+        _ => Err("Unsupported region type!"),
+    }
+}

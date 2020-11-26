@@ -1,8 +1,9 @@
 // nom
+use nom::branch::permutation;
 use nom::bytes::complete::tag;
 use nom::combinator::{map, opt, recognize};
 use nom::multi::many0;
-use nom::sequence::{delimited, preceded, terminated, tuple};
+use nom::sequence::{delimited, pair, preceded, terminated, tuple};
 use nom::IResult;
 
 // def
@@ -29,25 +30,27 @@ pub fn ndr_section(
 fn ndr_member(input: &str) -> IResult<&str, Ndr> {
     delimited(
         tag("-"),
-        tuple((
+        pair(
             tstring,
-            map(
-                opt(ws(tag("+ HARDSPACING"))),
-                |res: Option<&str>| match res {
-                    Some(_) => true,
-                    None => false,
-                },
-            ),
-            many0(ndr_layer),
-            // be cautious with space ending in the following two tag parser
-            many0(preceded(recognize(tag("+ VIA ")), tstring)),
-            many0(preceded(recognize(tag("+ VIARULE ")), tstring)),
-            many0(preceded(
-                recognize(tag("+ MINCUTS")),
-                tuple((tstring, number)),
+            permutation((
+                map(
+                    opt(ws(tag("+ HARDSPACING"))),
+                    |res: Option<&str>| match res {
+                        Some(_) => true,
+                        None => false,
+                    },
+                ),
+                many0(ndr_layer),
+                // be cautious with space ending in the following two tag parser
+                many0(preceded(recognize(tag("+ VIA ")), tstring)),
+                many0(preceded(recognize(tag("+ VIARULE ")), tstring)),
+                many0(preceded(
+                    recognize(tag("+ MINCUTS")),
+                    tuple((tstring, number)),
+                )),
+                properties,
             )),
-            properties,
-        )),
+        ),
         ws(tag(";")),
     )(input)
 }
@@ -108,48 +111,48 @@ mod tests {
         let ndrs = ndr_section.1;
 
         assert_eq!(num, 1);
+
+        let net_1_feature = (
+            false,
+            vec![
+                ("METAL1", 10.1, 8.01, 2.2, 1.1),
+                ("M2", 10.1, 0.0, 2.2, 0.0),
+                ("M3", 11.1, 0.0, 3.2, 0.0),
+            ],
+            vec!["M1_M2", "M2_M3"],
+            vec!["VIAGEN12"],
+            vec![("V1", 2)],
+            vec![
+                ("strprop", PropValue::SValue("\"aString\"")),
+                ("intprop", PropValue::IValue(1)),
+                ("realprop", PropValue::RValue(1.1)),
+                ("intrangeprop", PropValue::IValue(25)),
+                ("realrangeprop", PropValue::RValue(25.25)),
+            ],
+        );
+
+        let net_2_feature = (
+            true,
+            vec![
+                ("METAL1", 10.1, 8.01, 2.2, 1.1),
+                ("M2", 10.1, 0.0, 2.2, 0.0),
+                ("M3", 11.1, 0.0, 3.2, 0.0),
+            ],
+            vec!["M1_M2", "M2_M3"],
+            vec!["VIAGEN12"],
+            vec![("V1", 2)],
+            vec![
+                ("strprop", PropValue::SValue("\"aString\"")),
+                ("intprop", PropValue::IValue(1)),
+                ("realprop", PropValue::RValue(1.1)),
+                ("intrangeprop", PropValue::IValue(25)),
+                ("realrangeprop", PropValue::RValue(25.25)),
+            ],
+        );
+
         assert_eq!(
             ndrs,
-            vec![
-                (
-                    "DEFAULT",
-                    false,
-                    vec![
-                        ("METAL1", 10.1, 8.01, 2.2, 1.1),
-                        ("M2", 10.1, 0.0, 2.2, 0.0),
-                        ("M3", 11.1, 0.0, 3.2, 0.0)
-                    ],
-                    vec!["M1_M2", "M2_M3"],
-                    vec!["VIAGEN12"],
-                    vec![("V1", 2)],
-                    vec![
-                        ("strprop", PropValue::SValue("\"aString\"")),
-                        ("intprop", PropValue::IValue(1)),
-                        ("realprop", PropValue::RValue(1.1)),
-                        ("intrangeprop", PropValue::IValue(25)),
-                        ("realrangeprop", PropValue::RValue(25.25))
-                    ]
-                ),
-                (
-                    "RULE2",
-                    true,
-                    vec![
-                        ("METAL1", 10.1, 8.01, 2.2, 1.1),
-                        ("M2", 10.1, 0.0, 2.2, 0.0),
-                        ("M3", 11.1, 0.0, 3.2, 0.0)
-                    ],
-                    vec!["M1_M2", "M2_M3"],
-                    vec!["VIAGEN12"],
-                    vec![("V1", 2)],
-                    vec![
-                        ("strprop", PropValue::SValue("\"aString\"")),
-                        ("intprop", PropValue::IValue(1)),
-                        ("realprop", PropValue::RValue(1.1)),
-                        ("intrangeprop", PropValue::IValue(25)),
-                        ("realrangeprop", PropValue::RValue(25.25))
-                    ]
-                ),
-            ]
+            vec![("DEFAULT", net_1_feature,), ("RULE2", net_2_feature,),]
         );
     }
 }

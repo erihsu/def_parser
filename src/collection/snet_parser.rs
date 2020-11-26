@@ -4,7 +4,7 @@ use nom::bytes::complete::tag;
 use nom::combinator::{map, opt};
 use nom::multi::{many0, many1};
 
-use nom::sequence::{delimited, preceded, terminated, tuple};
+use nom::sequence::{delimited, pair, preceded, terminated, tuple};
 use nom::IResult;
 
 // def
@@ -30,27 +30,31 @@ pub fn snet_section(input: &str) -> IResult<&str, (i32, Vec<SNet>)> {
 fn snet_member(input: &str) -> IResult<&str, SNet> {
     delimited(
         tag("-"),
-        tuple((
-            tstring,
-            many0(delimited(
-                ws(tag("(")),
-                tuple((
-                    tstring,
-                    tstring,
-                    map(
-                        opt(ws(tag("+ SYNTHESIZED"))),
-                        |res: Option<&str>| match res {
-                            Some(_) => true,
-                            None => false,
-                        },
-                    ),
+        pair(
+            tuple((
+                tstring,
+                many0(delimited(
+                    ws(tag("(")),
+                    tuple((
+                        tstring,
+                        tstring,
+                        map(
+                            opt(ws(tag("+ SYNTHESIZED"))),
+                            |res: Option<&str>| match res {
+                                Some(_) => true,
+                                None => false,
+                            },
+                        ),
+                    )),
+                    ws(tag(")")),
                 )),
-                ws(tag(")")),
             )),
-            opt(preceded(ws(tag("+ VOLTAGE")), float)),
-            special_wiring,
-            snet_property,
-        )),
+            permutation((
+                opt(preceded(ws(tag("+ VOLTAGE")), float)),
+                special_wiring,
+                snet_property,
+            )),
+        ),
         ws(tag(";")),
     )(input)
 }

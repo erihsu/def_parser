@@ -1,8 +1,9 @@
 // nom
+use nom::branch::permutation;
 use nom::bytes::complete::tag;
 use nom::combinator::{map, opt};
 use nom::multi::many0;
-use nom::sequence::{delimited, preceded, terminated, tuple};
+use nom::sequence::{delimited, pair, preceded, terminated, tuple};
 use nom::IResult;
 
 // def
@@ -32,36 +33,37 @@ pub fn component_section(
 fn component_member(input: &str) -> IResult<&str, Component> {
     delimited(
         tag("-"),
-        tuple((
-            comp_name,
-            tstring,
-            opt(preceded(ws(tag("+ EEQMASTER")), tstring)),
-            opt(preceded(ws(tag("+ GENERATE")), tstring)),
-            opt(preceded(ws(tag("+ SOURCE")), source_type)),
-            // foreign
-            opt(preceded(ws(tag("+ WEIGHT")), number)),
-            opt(preceded(ws(tag("+ REGION")), tstring)),
-            //opt(preceded(ws(tag("+ MASKSHIFT")), tstring)),
-            opt(tuple((
-                map(
-                    preceded(ws(tag("+ HALO")), opt(ws(tag("SOFT")))),
-                    |res: Option<&str>| match res {
-                        Some(_) => true,
-                        None => false,
-                    },
-                ),
-                number,
-                number,
-                number,
-                number,
-            ))),
-            opt(tuple((
-                preceded(ws(tag("+ ROUTEHALO")), number),
-                tstring,
-                tstring,
-            ))),
-            properties,
-        )),
+        pair(
+            tuple((comp_name, tstring)),
+            permutation((
+                opt(preceded(ws(tag("+ EEQMASTER")), tstring)),
+                opt(preceded(ws(tag("+ GENERATE")), tstring)),
+                opt(preceded(ws(tag("+ SOURCE")), source_type)),
+                // foreign
+                opt(preceded(ws(tag("+ WEIGHT")), number)),
+                opt(preceded(ws(tag("+ REGION")), tstring)),
+                //opt(preceded(ws(tag("+ MASKSHIFT")), tstring)),
+                opt(tuple((
+                    map(
+                        preceded(ws(tag("+ HALO")), opt(ws(tag("SOFT")))),
+                        |res: Option<&str>| match res {
+                            Some(_) => true,
+                            None => false,
+                        },
+                    ),
+                    number,
+                    number,
+                    number,
+                    number,
+                ))),
+                opt(tuple((
+                    preceded(ws(tag("+ ROUTEHALO")), number),
+                    tstring,
+                    tstring,
+                ))),
+                properties,
+            )),
+        ),
         ws(tag(";")),
     )(input)
 }
