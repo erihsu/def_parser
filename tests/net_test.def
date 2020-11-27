@@ -21,7 +21,7 @@ NETS 6 ;
   + USE SIGNAL
   + PATTERN STEINER
   + ESTCAP 1500000
-  + WEIGHT 100
+    + WEIGHT 100
   + PROPERTY strprop "aString" 
   + PROPERTY intprop 1 
   + PROPERTY realprop 1.1 

@@ -1,5 +1,4 @@
 // nom
-use nom::branch::permutation;
 use nom::bytes::complete::tag;
 use nom::combinator::{map, opt};
 use nom::multi::many0;
@@ -36,7 +35,7 @@ fn component_member(input: &str) -> IResult<&str, Component> {
         tag("-"),
         pair(
             tuple((comp_name, tstring)),
-            permutation((
+            tuple((
                 opt(preceded(ws(tag("+ EEQMASTER")), tstring)),
                 opt(preceded(ws(tag("+ GENERATE")), tstring)),
                 opt(preceded(ws(tag("+")), source_type_encode)),

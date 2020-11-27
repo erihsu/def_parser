@@ -311,14 +311,13 @@ pub type Style = (
 pub type Pin<'a> = (
     (&'a str, &'a str), // pinName & netName
     (
-        // bool,                // Whether special
-        // Option<i32>,         // direction
-        // Option<&'a str>,     // NetExpre
-        // Option<&'a str>,     // PowerPin name
-        // Option<&'a str>,     // GroundPin name
-        // Option<i32>,         // pin mode
-        // Ports<'a>,
-        Vec<PinAntenna<'a>>, // antenna
+        bool,            // Whether special
+        Option<i32>,     // direction
+        Option<&'a str>, // NetExpre
+        Option<&'a str>, // PowerPin name
+        Option<&'a str>, // GroundPin name
+        Option<i32>,     // pin mode
+        Ports<'a>,
     ), //
 );
 

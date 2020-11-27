@@ -1,5 +1,5 @@
 // nom
-use nom::branch::{alt, permutation};
+use nom::branch::alt;
 use nom::bytes::complete::tag;
 use nom::combinator::{map, opt};
 use nom::multi::many0;
@@ -37,17 +37,16 @@ fn pin_member(input: &str) -> IResult<&str, Pin> {
         tuple((
             tuple((tstring, preceded(ws(tag("+ NET")), tstring))),
             tuple((
-                // map(opt(ws(tag("+ SPECIAL"))), |n| match n {
-                //     Some(_) => true,
-                //     None => false,
-                // }),
-                // opt(preceded(ws(tag("+")), pin_direction_encode)),
-                // opt(preceded(ws(tag("+ NETEXPR")), qstring)),
-                // opt(preceded(ws(tag("+ SUPPLYSENSITIVITY")), tstring)),
-                // opt(preceded(ws(tag("+ GROUNDSENSITIVITY")), tstring)),
-                // opt(preceded(ws(tag("+")), use_mode_encode)),
-                // many0(pin_port),
-                many0(pin_antenna),
+                map(opt(ws(tag("+ SPECIAL"))), |n| match n {
+                    Some(_) => true,
+                    None => false,
+                }),
+                opt(pin_direction_encode),
+                opt(preceded(ws(tag("+ NETEXPR")), qstring)),
+                opt(preceded(ws(tag("+ SUPPLYSENSITIVITY")), tstring)),
+                opt(preceded(ws(tag("+ GROUNDSENSITIVITY")), tstring)),
+                opt(use_mode_encode),
+                many0(pin_port),
             )),
         )),
         ws(tag(";")),
@@ -133,6 +132,7 @@ fn pin_antenna(input: &str) -> IResult<&str, PinAntenna> {
         ),
     ))(input)
 }
+
 fn pin_port_element(input: &str) -> IResult<&str, PortElem> {
     alt((
         map(
@@ -182,53 +182,53 @@ mod tests {
         let pins = pin_section.1;
 
         let pin_1_feature = (
-            // true,               // Whether special
-            // Some(0),            // direction
-            // Some("power1 VDD"), // NetExpre
-            // Some("P1"),         // PowerPin name
-            // Some("P2"),         // GroundPin name
-            // Some(6),            // pin mode
             // vec![
-            //     (
-            //         vec![
-            //             PortElem::Layer(("M2", None, ((0, 0), (30, 135)))),
-            //             PortElem::Via(("VIAGEN12_0", (0, 100))),
-            //         ],
-            //         1,
-            //         (45, -2160),
-            //         0,
-            //     ),
-            //     (
-            //         vec![
-            //             PortElem::Layer(("M1", None, ((0, 0), (30, 135)))),
-            //             PortElem::Via(("M1_M2", (100, 0))),
-            //         ],
-            //         2,
-            //         (0, -100),
-            //         0,
-            //     ),
-            //     (
-            //         vec![PortElem::Layer(("M3", None, ((0, 0), (30, 135))))],
-            //         0,
-            //         (1000, -1000),
-            //         0,
-            //     ),
+            //     PinAntenna::PartialMetalArea((5, Some("METAL1"))),
+            //     PinAntenna::PartialMetalArea((5, Some("M2"))),
+            //     PinAntenna::PartialMetalSideArea((10, Some("METAL1"))),
+            //     PinAntenna::PartialMetalSideArea((10, Some("M2"))),
+            //     PinAntenna::PartialCutArea((35, Some("V1"))),
+            //     PinAntenna::PartialCutArea((35, Some("V2"))),
+            //     PinAntenna::DiffArea((20, Some("M1"))),
+            //     PinAntenna::DiffArea((20, Some("M2"))),
+            //     PinAntenna::Model(Some(0)),
+            //     PinAntenna::GateArea((15, Some("M1"))),
+            //     PinAntenna::GateArea((15, Some("M2"))),
+            //     PinAntenna::MaxAreaCar((25, "M2")),
+            //     PinAntenna::MaxSideAreaCar((30, "M1")),
+            //     PinAntenna::MaxCutCar((40, "M1")),
             // ],
+            true,       // Whether special
+            Some(0),    // direction
+            None,       // NetExpre
+            Some("P1"), // PowerPin name
+            Some("P2"), // GroundPin name
+            Some(6),    // pin mode
             vec![
-                PinAntenna::PartialMetalArea((5, Some("METAL1"))),
-                PinAntenna::PartialMetalArea((5, Some("M2"))),
-                PinAntenna::PartialMetalSideArea((10, Some("METAL1"))),
-                PinAntenna::PartialMetalSideArea((10, Some("M2"))),
-                PinAntenna::PartialCutArea((35, Some("V1"))),
-                PinAntenna::PartialCutArea((35, Some("V2"))),
-                PinAntenna::DiffArea((20, Some("M1"))),
-                PinAntenna::DiffArea((20, Some("M2"))),
-                PinAntenna::Model(Some(0)),
-                PinAntenna::GateArea((15, Some("M1"))),
-                PinAntenna::GateArea((15, Some("M2"))),
-                PinAntenna::MaxAreaCar((25, "M2")),
-                PinAntenna::MaxSideAreaCar((30, "M1")),
-                PinAntenna::MaxCutCar((40, "M1")),
+                (
+                    vec![
+                        PortElem::Layer(("M2", None, ((0, 0), (30, 135)))),
+                        PortElem::Via(("VIAGEN12_0", (0, 100))),
+                    ],
+                    1,
+                    (45, -2160),
+                    0,
+                ),
+                (
+                    vec![
+                        PortElem::Layer(("M1", None, ((0, 0), (30, 135)))),
+                        PortElem::Via(("M1_M2", (100, 0))),
+                    ],
+                    2,
+                    (0, -1000),
+                    0,
+                ),
+                (
+                    vec![PortElem::Layer(("M3", None, ((0, 0), (30, 135))))],
+                    0,
+                    (1000, -1000),
+                    0,
+                ),
             ],
         );
 

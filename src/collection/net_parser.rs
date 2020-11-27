@@ -1,5 +1,5 @@
 // nom
-use nom::branch::{alt, permutation};
+use nom::branch::alt;
 use nom::bytes::complete::tag;
 use nom::combinator::{map, opt};
 use nom::multi::{many0, many1};
@@ -61,7 +61,7 @@ fn net_member(input: &str) -> IResult<&str, Net> {
                     ws(tag(")")),
                 )),
             )),
-            permutation((
+            tuple((
                 many0(preceded(ws(tag("+ SHIELDNET")), tstring)),
                 many0(vpin),
                 many0(subnet),
@@ -142,16 +142,16 @@ fn subnet(input: &str) -> IResult<&str, SubNet> {
 }
 
 fn net_property(input: &str) -> IResult<&str, NetProperty> {
-    permutation((
-        preceded(ws(tag("+")), source_type_encode),
+    tuple((
+        source_type_encode,
         map(opt(ws(tag("+ FIXEDBUMP"))), |res: Option<&str>| match res {
             Some(_) => true,
             None => false,
         }),
         opt(preceded(ws(tag("+ FREQUENCY")), number)),
         opt(preceded(ws(tag("+ ORIGINAL")), tstring)),
-        opt(preceded(ws(tag("+")), use_mode_encode)),
-        opt(preceded(ws(tag("+")), net_pattern_encode)),
+        opt(use_mode_encode),
+        opt(net_pattern_encode),
         opt(preceded(ws(tag("+ ESTCAP")), number)),
         opt(preceded(ws(tag("+ WEIGHT")), number)),
         properties,
