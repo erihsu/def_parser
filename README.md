@@ -34,6 +34,9 @@ DESIGN statement
 [ BEGINEXT section ]
 END DESIGN statement
 ```
+Hold the principle of combinational parser, we first construct each sub-parser in DEF syntax and combine them to parse the whole DEF file.
+
+
 **Notes**: `[]` around section means that the section in DEF is optional. For more details of each section definition, please refer to the [lef/def reference](http://www.ispd.cc/contests/18/lefdefref.pdf).
 
 ## Limitation
