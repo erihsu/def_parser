@@ -9,7 +9,8 @@ use nom::IResult;
 
 // def
 use crate::def_parser::base::{float, number, qstring, tstring, ws};
-use crate::def_parser::common::{on_or_off, orient, pt_list, x_or_y};
+use crate::def_parser::common::{on_or_off, pt_list, x_or_y};
+use crate::def_parser::encoder::orient_encode;
 
 // design block parsers
 
@@ -147,7 +148,7 @@ pub fn row_rule_def_list(
             preceded(ws(tag("ROW")), tstring),
             row_type,
             pair(number, number),
-            orient,
+            orient_encode,
             tuple((
                 preceded(ws(tag("DO")), number),
                 preceded(ws(tag("BY")), number),

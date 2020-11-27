@@ -60,9 +60,7 @@ fn snet_member(input: &str) -> IResult<&str, SNet> {
 }
 
 fn special_wire_shape(input: &str) -> IResult<&str, i32> {
-    map(preceded(ws(tag("+ SHAPE")), tstring), |res| {
-        snet_shape_encode(res).unwrap()
-    })(input)
+    preceded(ws(tag("+")), snet_shape_encode)(input)
 }
 
 fn special_wire_basic(input: &str) -> IResult<&str, SpecialWireBasic> {
@@ -77,9 +75,7 @@ fn special_wire_basic(input: &str) -> IResult<&str, SpecialWireBasic> {
 
 fn special_wiring(input: &str) -> IResult<&str, SpecialWireStmt> {
     many0(tuple((
-        map(preceded(ws(tag("+")), tstring), |res| {
-            snet_global_attribute_encode(res).unwrap()
-        }),
+        preceded(ws(tag("+")), snet_global_attribute_encode),
         many1(alt((
             preceded(ws(tag("NEW")), special_wire_basic),
             special_wire_basic,
@@ -89,20 +85,14 @@ fn special_wiring(input: &str) -> IResult<&str, SpecialWireStmt> {
 
 fn snet_property(input: &str) -> IResult<&str, SNetProperty> {
     permutation((
-        map(preceded(ws(tag("+ SOURCE")), tstring), |res| {
-            source_type_encode(res).unwrap()
-        }),
+        preceded(ws(tag("+")), source_type_encode),
         map(opt(ws(tag("+ FIXEDBUMP"))), |res: Option<&str>| match res {
             Some(_) => true,
             None => false,
         }),
         opt(preceded(ws(tag("+ ORIGINAL")), tstring)),
-        map(preceded(ws(tag("+ USE")), tstring), |res| {
-            use_mode_encode(res).unwrap()
-        }),
-        map(preceded(ws(tag("+ PATTERN")), tstring), |res| {
-            net_pattern_encode(res).unwrap()
-        }),
+        preceded(ws(tag("+")), use_mode_encode),
+        preceded(ws(tag("+")), net_pattern_encode),
         opt(preceded(ws(tag("+ ESTCAP")), number)),
         opt(preceded(ws(tag("+ WEIGHT")), number)),
         properties,

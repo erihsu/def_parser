@@ -8,12 +8,12 @@ use nom::IResult;
 
 // def
 use crate::def_parser::base::{number, tstring, ws};
-use crate::def_parser::common::{orient, properties, pt_new, rect, route_body};
+use crate::def_parser::common::{properties, pt_new, rect, route_body};
 use crate::def_parser::def_types::{
     Net, NetProperty, RegularWireBasic, RegularWireStmt, SubNet, Vpin,
 };
 use crate::def_parser::encoder::{
-    net_global_attribute_encode, net_pattern_encode, pin_location_attribute_encode,
+    net_global_attribute_encode, net_pattern_encode, orient_encode, pin_location_attribute_encode,
     source_type_encode, use_mode_encode,
 };
 
@@ -91,13 +91,7 @@ fn regular_wire_basic(input: &str) -> IResult<&str, RegularWireBasic> {
 
 fn regular_wiring(input: &str) -> IResult<&str, RegularWireStmt> {
     many0(tuple((
-        map(
-            pair(
-                ws(tag("+")),
-                alt((tag("COVER"), tag("FIXED"), tag("ROUTED"), tag("NOSHIELD"))),
-            ),
-            |n| net_global_attribute_encode(n.1).unwrap(),
-        ),
+        preceded(ws(tag("+")), net_global_attribute_encode),
         many1(alt((
             preceded(ws(tag("NEW")), regular_wire_basic),
             regular_wire_basic,
@@ -107,10 +101,7 @@ fn regular_wiring(input: &str) -> IResult<&str, RegularWireStmt> {
 
 fn subnet_regular_wiring(input: &str) -> IResult<&str, RegularWireStmt> {
     many0(tuple((
-        map(
-            alt((tag("COVER"), tag("FIXED"), tag("ROUTED"), tag("NOSHIELD"))),
-            |n| net_global_attribute_encode(n).unwrap(),
-        ),
+        net_global_attribute_encode,
         many1(alt((
             preceded(ws(tag("NEW")), regular_wire_basic),
             regular_wire_basic,
@@ -123,11 +114,9 @@ fn vpin(input: &str) -> IResult<&str, Vpin> {
         preceded(ws(tag("+ VPIN")), tstring),
         opt(preceded(ws(tag("LAYER")), tstring)),
         rect,
-        opt(map(tstring, |res| {
-            pin_location_attribute_encode(res).unwrap()
-        })),
+        opt(pin_location_attribute_encode),
         opt(pt_new),
-        opt(orient),
+        opt(orient_encode),
     ))(input)
 }
 
@@ -154,21 +143,15 @@ fn subnet(input: &str) -> IResult<&str, SubNet> {
 
 fn net_property(input: &str) -> IResult<&str, NetProperty> {
     permutation((
-        map(preceded(ws(tag("+ SOURCE")), tstring), |res| {
-            source_type_encode(res).unwrap()
-        }),
+        preceded(ws(tag("+")), source_type_encode),
         map(opt(ws(tag("+ FIXEDBUMP"))), |res: Option<&str>| match res {
             Some(_) => true,
             None => false,
         }),
         opt(preceded(ws(tag("+ FREQUENCY")), number)),
         opt(preceded(ws(tag("+ ORIGINAL")), tstring)),
-        opt(map(preceded(ws(tag("+ USE")), tstring), |res| {
-            use_mode_encode(res).unwrap()
-        })),
-        opt(map(preceded(ws(tag("+ PATTERN")), tstring), |res| {
-            net_pattern_encode(res).unwrap()
-        })),
+        opt(preceded(ws(tag("+")), use_mode_encode)),
+        opt(preceded(ws(tag("+")), net_pattern_encode)),
         opt(preceded(ws(tag("+ ESTCAP")), number)),
         opt(preceded(ws(tag("+ WEIGHT")), number)),
         properties,

@@ -8,8 +8,9 @@ use nom::IResult;
 
 // def
 use crate::def_parser::base::{number, tstring, ws};
-use crate::def_parser::common::{comp_name, properties, source_type};
+use crate::def_parser::common::{comp_name, properties};
 use crate::def_parser::def_types::Component;
+use crate::def_parser::encoder::source_type_encode;
 
 pub fn component_section(
     input: &str,
@@ -38,7 +39,7 @@ fn component_member(input: &str) -> IResult<&str, Component> {
             permutation((
                 opt(preceded(ws(tag("+ EEQMASTER")), tstring)),
                 opt(preceded(ws(tag("+ GENERATE")), tstring)),
-                opt(preceded(ws(tag("+ SOURCE")), source_type)),
+                opt(preceded(ws(tag("+")), source_type_encode)),
                 // foreign
                 opt(preceded(ws(tag("+ WEIGHT")), number)),
                 opt(preceded(ws(tag("+ REGION")), tstring)),

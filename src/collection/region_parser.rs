@@ -1,7 +1,7 @@
 // nom
 use nom::branch::permutation;
 use nom::bytes::complete::tag;
-use nom::combinator::{map, opt};
+use nom::combinator::opt;
 use nom::multi::{many0, many1};
 use nom::sequence::{delimited, pair, preceded, terminated, tuple};
 use nom::IResult;
@@ -39,12 +39,7 @@ fn region_member(input: &str) -> IResult<&str, Region> {
                 tstring, // name
                 many1(rect),
             )),
-            permutation((
-                opt(map(preceded(ws(tag("+ TYPE")), tstring), |n| {
-                    region_type_encode(n).unwrap()
-                })),
-                properties,
-            )),
+            permutation((opt(preceded(ws(tag("+")), region_type_encode)), properties)),
         ),
         ws(tag(";")),
     )(input)

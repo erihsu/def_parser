@@ -34,7 +34,7 @@ fn style_member(input: &str) -> IResult<&str, Style> {
 
 #[cfg(test)]
 mod tests {
-    use crate::def_parser::def_types::*;
+
     use crate::def_parser::style_parser::*;
     use std::io::Read;
 

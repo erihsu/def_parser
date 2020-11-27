@@ -309,26 +309,33 @@ pub type Style = (
 
 // Pin
 pub type Pin<'a> = (
-    (&'a str, &'a str),          // pinName & netName
-    bool,                        // Whether special
-    i32,                         // direction
-    Option<&'a str>,             // NetExpre
-    Option<&'a str>,             // PowerPin name
-    Option<&'a str>,             // GroundPin name
-    Option<i32>,                 // pin mode
-    Vec<(i32, Option<&'a str>)>, // ANTENNAPINPARTIALMETALAREA
-    Vec<(i32, Option<&'a str>)>, // ANTENNAPINPARTIALMETALSIDEAREA
-    Vec<(i32, Option<&'a str>)>, // ANTENNAPINPARTIALCUTAREA
-    Vec<(i32, Option<&'a str>)>, // ANTENNAPINDIFFAREA
-    Option<i32>,                 // ANTENNAMODEL
-    Vec<(i32, Option<&'a str>)>, // ANTENNAPINGATEAREA
-    Vec<(i32, &'a str)>,         // ANTENNAPINMAXAREACAR
-    Vec<(i32, &'a str)>,         // ANTENNAPINMAXSIDEAREACAR
-    Vec<(i32, &'a str)>,         // ANTENNAPINMAXCUTCAR
-    Ports<'a>,                   //
+    (&'a str, &'a str), // pinName & netName
+    (
+        // bool,                // Whether special
+        // Option<i32>,         // direction
+        // Option<&'a str>,     // NetExpre
+        // Option<&'a str>,     // PowerPin name
+        // Option<&'a str>,     // GroundPin name
+        // Option<i32>,         // pin mode
+        // Ports<'a>,
+        Vec<PinAntenna<'a>>, // antenna
+    ), //
 );
 
 type Ports<'a> = Vec<Port<'a>>;
+
+#[derive(Debug, PartialEq)]
+pub enum PinAntenna<'a> {
+    PartialMetalArea((i32, Option<&'a str>)),
+    PartialMetalSideArea((i32, Option<&'a str>)),
+    PartialCutArea((i32, Option<&'a str>)),
+    DiffArea((i32, Option<&'a str>)),
+    Model(Option<i32>),
+    GateArea((i32, Option<&'a str>)),
+    MaxAreaCar((i32, &'a str)),
+    MaxSideAreaCar((i32, &'a str)),
+    MaxCutCar((i32, &'a str)),
+}
 
 pub type Port<'a> = (
     Vec<PortElem<'a>>,
@@ -337,7 +344,7 @@ pub type Port<'a> = (
     i32,        // orient
 );
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum PortElem<'a> {
     Layer((&'a str, Option<i32>, ((i32, i32), (i32, i32)))),
     Polygon((&'a str, Option<i32>, Vec<(i32, i32)>)),

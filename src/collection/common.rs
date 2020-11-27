@@ -12,13 +12,7 @@ use std::str;
 
 use crate::def_parser::base::{float, number, number_str, qstring, tstring, ws};
 use crate::def_parser::def_types::{Geometry, PropValue, Properties, RouteBody, RouteElem, RtPt};
-use crate::def_parser::encoder::{orient_encode, source_type_encode};
 // common parser used in def_parser. These parser are very commonly used in def_parser so collect them together.
-
-// parse orient
-pub fn orient(input: &str) -> IResult<&str, i32> {
-    ws(map(tstring, |res| orient_encode(res).unwrap()))(input)
-}
 
 pub fn pt(input: &str) -> IResult<&str, (&str, &str)> {
     delimited(
@@ -109,12 +103,6 @@ pub fn inline_comment(input: &str) -> IResult<&str, &str> {
     delimited(tag("#"), is_not("\n"), tag("\n"))(input)
 }
 
-pub fn source_type(input: &str) -> IResult<&str, i32> {
-    map(recognize(preceded(ws(tag("SOURCE")), tstring)), |res| {
-        source_type_encode(res).unwrap()
-    })(input)
-}
-
 // different from tstring and qstring, comp_name might contain hierachical struct and bus bit information
 // ie, i1/i2[2]/i3.
 // Only support use busbit_char = "[]", divider char = "/"
@@ -174,12 +162,6 @@ mod tests {
         assert_eq!(pt("( 200 200 )").unwrap(), ("", ("200", "200")));
         assert_eq!(pt("( 200 * )").unwrap(), ("", ("200", "*")));
         assert_eq!(pt("( * -200 )").unwrap(), ("", ("*", "-200")));
-    }
-
-    #[test]
-    fn test_orient() {
-        assert_eq!(orient(" N").unwrap(), ("", 0));
-        assert_eq!(orient("FN ").unwrap(), ("", 4));
     }
 
     #[test]
