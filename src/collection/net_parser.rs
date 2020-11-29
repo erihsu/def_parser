@@ -7,7 +7,7 @@ use nom::sequence::{delimited, pair, preceded, terminated, tuple};
 use nom::IResult;
 
 // def
-use crate::def_parser::base::{number, tstring, ws};
+use crate::def_parser::base::{itstring, number, tstring, ws};
 use crate::def_parser::common::{properties, pt_new, rect, route_body};
 use crate::def_parser::def_types::{
     Net, NetProperty, RegularWireBasic, RegularWireStmt, SubNet, Vpin,
@@ -66,7 +66,7 @@ fn net_member(input: &str) -> IResult<&str, Net> {
                 many0(vpin),
                 many0(subnet),
                 opt(preceded(ws(tag("+ XTALK")), number)),
-                opt(preceded(ws(tag("+ NONDEFAULTRULE")), tstring)),
+                opt(preceded(ws(tag("+ NONDEFAULTRULE")), itstring)),
                 regular_wiring,
                 net_property,
             )),
@@ -135,7 +135,7 @@ fn subnet(input: &str) -> IResult<&str, SubNet> {
             )),
         )),
         tuple((
-            opt(preceded(ws(tag("NONDEFAULTRULE")), tstring)),
+            opt(preceded(ws(tag("NONDEFAULTRULE")), itstring)),
             subnet_regular_wiring,
         )),
     ))(input)
@@ -143,7 +143,7 @@ fn subnet(input: &str) -> IResult<&str, SubNet> {
 
 fn net_property(input: &str) -> IResult<&str, NetProperty> {
     tuple((
-        source_type_encode,
+        opt(source_type_encode),
         map(opt(ws(tag("+ FIXEDBUMP"))), |res: Option<&str>| match res {
             Some(_) => true,
             None => false,
@@ -188,7 +188,7 @@ mod tests {
             None,   // ndr
             vec![],
             (
-                4,
+                Some(4),
                 false, // fixedbump
                 None,  // frequency
                 None,  // original
@@ -267,7 +267,7 @@ mod tests {
                 ],
             )],
             (
-                1,
+                Some(1),
                 true,
                 Some(100),
                 Some("N2"),

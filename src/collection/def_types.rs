@@ -278,7 +278,7 @@ pub type SNet<'a> = (
 
 // NetProperty that used in NET
 pub type NetProperty<'a> = (
-    i32,             //SOURCE. 0: DIST; 1: NETLIST; 2:TEST; 3:TIMING; 4:USER
+    Option<i32>,     //SOURCE. 0: DIST; 1: NETLIST; 2:TEST; 3:TIMING; 4:USER
     bool,            // FIXEDBUMP
     Option<i32>,     // FREQUENCY
     Option<&'a str>, // ORIGINAL

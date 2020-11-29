@@ -33,6 +33,14 @@ pub fn tstring(input: &str) -> IResult<&str, &str> {
     )))(input)
 }
 
+// // allow tstring preceded with number
+pub fn itstring(input: &str) -> IResult<&str, &str> {
+    ws(recognize(pair(
+        alt((alpha1, tag("_"), digit1)),
+        many0(alt((alphanumeric1, tag("_")))),
+    )))(input)
+}
+
 // // parse string that is surrounded by " and ".
 // // ie, "abc", "def"
 pub fn qstring(input: &str) -> IResult<&str, &str> {

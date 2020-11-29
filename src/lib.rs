@@ -2,4 +2,4 @@
 // extern crate def;
 extern crate nom;
 
-mod def_parser;
+pub mod def_parser;
