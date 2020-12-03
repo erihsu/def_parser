@@ -42,4 +42,4 @@ Hold the principle of combinational parser, we first construct each sub-parser i
 ## Limitation
 
 1. We strictly follow the syntax described in lefdef 5.7 reference and higher version than 5.7 may cause parser fail.
-
+2. Some features mentioned in lefdef 5.7 reference may not supported. **Synthesized** in PIN section
