@@ -53,7 +53,7 @@ pub type Pinprop<'a> = (
     &'a str,         // pinName of exact PIN or component
     Properties<'a>,
 );
-
+/************************************************************************************************** */
 // VIAS
 pub type Via<'a> = (
     &'a str, // viaName
@@ -65,7 +65,7 @@ pub type Via<'a> = (
         Option<(i32, i32, i32, i32)>,        // endClosure. (xBotEnc, yBotEnc, xTopEnc, yTopEnc)
         Option<(i32, i32)>,                  // ROWCOL. (numCutRows, NumCutCols)
         Option<(i32, i32)>,                  // ORIGIN. (xOffset, yOffset)
-        Option<(i32, i32)>, // OFFSET. (xBotOffset, yBotOffset, xTopOffset, yTopOffset)
+        Option<(i32, i32, i32, i32)>, // OFFSET. (xBotOffset, yBotOffset, xTopOffset, yTopOffset)
         Option<&'a str>,    // PATTERN. cutPattern
         Vec<(
             &'a str,     // Rect Name
@@ -74,6 +74,10 @@ pub type Via<'a> = (
         )>,
     ),
 );
+
+
+///************************************************************************************************************ */
+
 
 // GROUPS
 #[derive(Debug, PartialEq)]
