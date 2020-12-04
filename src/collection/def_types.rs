@@ -1,5 +1,80 @@
 // Define reusable type alias
 
+pub type DesignConfig<'a> = (
+    &'a str,         // design name
+    Option<&'a str>, // technology name
+    Option<i32>,     // units
+    Option<
+        Vec<(
+            &'a str, // object type of property. ie, design, region, group, component,...
+            &'a str, // property name
+            (
+                char,    // data type of property
+                bool,    // whether has range
+                bool,    // whether has number
+                bool,    // whether has name_map_string
+                &'a str, // string data if belongs to 'S' data type
+                f64,     // left boarder of range if has range
+                f64,     // right boarder of range if has range
+                f64,     // data if has number
+            ),
+        )>,
+    >, // propdef
+    Option<Vec<(i32, i32)>>, // die area
+    Option<
+        Vec<(
+            (
+                &'a str, // name of row rule
+                &'a str, // row rule type
+                (
+                    i32, //  the origin of rule scope along axis X
+                    i32, // the origin of rule scope along axis Y
+                ),
+                i32, // orient of row rule
+                (
+                    i32, // step number along axis X
+                    i32, // step number along axis Y
+                    i32, // step size along axis X
+                    i32, // step size along axis Y
+                ),
+            ),
+            (
+                Vec<&'a str>, // property name of row rule
+                Vec<&'a str>, // property value(String type) of row rule
+                Vec<f64>,     // property value(real type) of row rule
+                i32,          // number of property of row rule
+            ),
+        )>,
+    >, // rows
+    Option<
+        Vec<(
+            (
+                char, // axis. 'X' or 'Y'
+                i32,  // the origin of gcell grid along axis X/Y
+                i32,  // the step number of track
+                i32,  // the step size of track
+            ),
+            (
+                Option<i32>,          // mask number of the track. optional
+                Option<bool>,         // whether the samemask. optional
+                Option<Vec<&'a str>>, // the metal layer of track
+            ),
+        )>,
+    >, // tracks
+    Option<
+        Vec<(
+            char, // axis. 'X' or 'Y'
+            i32,  // the origin of gcell grid along axis X/Y
+            i32,  // the step number of gcell grid
+            i32,  // the step size of gcell grid
+        )>,
+    >, // gcellgrid
+    (
+        i32, // viaNum
+        Vec<Via<'a>>,
+    ), // via
+);
+
 pub type Properties<'a> = Vec<(
     // property defined in DESIGN Section
     &'a str, // property name
@@ -19,23 +94,32 @@ pub enum Geometry {
     Polygon(Vec<(i32, i32)>),
 }
 
+pub type Location = (
+    i32,        // location attribute
+    (i32, i32), // location
+    i32,        // orient
+);
+
 pub type Pts = Vec<(i32, i32)>;
+pub type Rect = ((i32, i32), (i32, i32));
 // NONDEFAULTRULES
 pub type Ndr<'a> = (
     &'a str, // ndr name
-    bool,    // whether hardspacing
-    Vec<(
-        // Layer rule.
-        &'a str, // layer name
-        f64,     // width. integer
-        f64,     // diagwidth. integer
-        f64,     // spacing. integer
-        f64,     // wireext. integer
-    )>,
-    Vec<&'a str>,        // VIA. specifiy previous vias to use this rule
-    Vec<&'a str>,        // VIARULE.
-    Vec<(&'a str, i32)>, // minCuts. specifiy the minimuum number of cuts allowed for via using this cut layer
-    Properties<'a>,
+    (
+        bool, // whether hardspacing
+        Vec<(
+            // Layer rule.
+            &'a str,     // layer name
+            i32,         // width. integer
+            Option<i32>, // diagwidth. integer
+            Option<i32>, // spacing. integer
+            Option<i32>, // wireext. integer
+        )>,
+        Vec<&'a str>,        // VIA. specifiy previous vias to use this rule
+        Vec<&'a str>,        // VIARULE.
+        Vec<(&'a str, i32)>, // (curLayer,minCuts). specifiy the minimuum number of cuts allowed for via using this cut layer
+        Properties<'a>,
+    ),
 );
 
 // SLOT
@@ -52,47 +136,53 @@ pub type Pinprop<'a> = (
 );
 
 // VIAS
+#[derive(Debug)]
+pub enum ViaBody<'a> {
+    Fixed(
+        Vec<(
+            &'a str,  // Layer Name
+            Geometry, //
+        )>,
+    ),
+    Generated(
+        (
+            &'a str,                      // viaRule
+            (i32, i32),                   // cutSize. (xSize, ySize)
+            (&'a str, &'a str, &'a str),  // LAYERS. (botmetalLayer,cutLayer,topMetalLayer)
+            (i32, i32),                   // cutSpacing. (xCutSpacing,yCutSpacing)
+            (i32, i32, i32, i32),         // endClosure. (xBotEnc, yBotEnc, xTopEnc, yTopEnc)
+            Option<(i32, i32)>,           // ROWCOL. (numCutRows, NumCutCols)
+            Option<(i32, i32)>,           // ORIGIN. (xOffset, yOffset)
+            Option<(i32, i32, i32, i32)>, // OFFSET. (xBotOffset, yBotOffset, xTopOffset, yTopOffset)
+            Option<&'a str>,              // PATTERN. cutPattern
+        ),
+    ),
+}
+
 pub type Via<'a> = (
-    &'a str,                             // viaName
-    Option<&'a str>,                     // viaRule
-    Option<(i32, i32)>,                  // cutSize. (xSize, ySize)
-    Option<(&'a str, &'a str, &'a str)>, // LAYERS. (botmetalLayer,cutLayer,topMetalLayer)
-    Option<(i32, i32)>,                  // cutSpacing. (xCutSpacing,yCutSpacing)
-    Option<(i32, i32, i32, i32)>,        // endClosure. (xBotEnc, yBotEnc, xTopEnc, yTopEnc)
-    Option<(i32, i32)>,                  // ROWCOL. (numCutRows, NumCutCols)
-    Option<(i32, i32)>,                  // ORIGIN. (xOffset, yOffset)
-    Option<(i32, i32)>,                  // OFFSET. (xBotOffset, yBotOffset, xTopOffset, yTopOffset)
-    Option<&'a str>,                     // PATTERN. cutPattern
-    Vec<(
-        &'a str,     // Rect Name
-        Option<i32>, // maskNum
-        Pts,         // list of points
-    )>,
+    &'a str, // viaName
+    ViaBody<'a>,
 );
 
 // GROUPS
-#[derive(Debug, PartialEq)]
-pub enum GroupRegion<'a> {
-    PreDefined(&'a str), // Region. use predefined region by name
-    NewDefined(((i32, i32), (i32, i32))),
-}
 
 pub type Group<'a> = (
     &'a str,      // groupName
     Vec<&'a str>, // compNamePattern. A component name, a list of component names or a pattern for a set of components
-    Option<i32>,  // SOFT. maxhalfperimeter
-    Option<i32>,  // SOFT. MAXX
-    Option<i32>,  // SOFT. MAXY
-    GroupRegion<'a>,
+    &'a str,      // regionName
     Properties<'a>,
 );
 
 // REGIONS
 pub type Region<'a> = (
-    &'a str,                       // region name
-    Vec<((i32, i32), (i32, i32))>, // define a region as one or more rectangular areas specified by pairs of coordinate points
-    Option<i32>,                   // TYPE. FENCE or GUIDE
-    Properties<'a>,
+    (
+        &'a str,   // region name
+        Vec<Rect>, // define a region as one or more rectangular areas specified by pairs of coordinate points
+    ),
+    (
+        Option<i32>, // TYPE. FENCE or GUIDE
+        Properties<'a>,
+    ),
 );
 
 // FILL
@@ -100,17 +190,15 @@ pub type Region<'a> = (
 pub enum Fill<'a> {
     Layer(
         (
-            &'a str,     // name of layer
-            Option<i32>, // Mask number
-            bool,        // whether OPC
+            &'a str, // name of layer
+            bool,    // whether OPC
             Vec<Geometry>,
         ),
     ),
     Via(
         (
-            &'a str,     // name of via
-            Option<i32>, // mask number
-            bool,        // whether OPC
+            &'a str, // name of via
+            bool,    // whether OPC
             Pts,
         ),
     ),
@@ -129,7 +217,6 @@ pub enum Blockage<'a> {
                 bool, // EXCEPTPGNET. Indicates that whether the blockage only blocks signal net routing, and does not block power or ground net routing.
                 Option<i32>, // SPACING or DESIGNRULEWIDTH. minimum spacing allowed between the blockage and any other routing shape
                 Option<&'a str>, // COMPONENT. component with which to associate a blockage.
-                Option<i32>, // MASK.
             ),
             Vec<Geometry>,
         ),
@@ -149,113 +236,145 @@ pub enum Blockage<'a> {
 
 // COMPONENT
 pub type Component<'a> = (
-    &'a str,                            // component(instance) name
-    &'a str,                            // model name
-    Option<&'a str>,                    // EEQMASTER
-    Option<&'a str>,                    // GENERATE
-    Option<i32>,                        // SOURCE
-    Option<i32>,                        // WEIGHT
-    Option<&'a str>,                    // REGION
-    Option<(bool, i32, i32, i32, i32)>, // HALO
-    Option<(i32, &'a str, &'a str)>,    // ROUTEDHALO
-    Properties<'a>,                     // Properties
+    (
+        &'a str, // component(instance) name
+        &'a str, // model name
+    ), // basic
+    (
+        Option<&'a str>,                    // EEQMASTER
+        Option<i32>,                        // SOURCE
+        (i32, Option<((i32, i32), i32)>),   // location and attribute
+        Option<i32>,                        // WEIGHT
+        Option<&'a str>,                    // REGION
+        Option<(bool, i32, i32, i32, i32)>, // HALO
+        Option<(i32, &'a str, &'a str)>,    // ROUTEDHALO
+        Properties<'a>,                     // Properties
+    ), //feature
 );
 
 // NET
 
-#[derive(Debug)]
-pub enum RoutingPoint<'a> {
-    Pt((i32, i32, Option<i32>)),
+#[derive(Debug, PartialEq)]
+pub enum RouteElem<'a> {
+    Pt(RtPt<'a>),
     Via(
         (
-            &'a str,     // viaName
-            Option<i32>, // orient
+            RtPt<'a>,
+            &'a str, // viaName
         ),
     ),
 }
 
+pub type RtPt<'a> = (Option<i32>, Option<i32>, Option<i32>);
+
+pub type RouteBody<'a> = Vec<RouteElem<'a>>;
+
 pub type RegularWireBasic<'a> = (
-    Option<i32>,           // 0: cover; 1: fixed; 2: routed; 3: noshield
-    &'a str,               // layer name
-    Option<&'a str>,       // TAPERRULE
-    Option<i32>,           // stylNum,
-    Vec<RoutingPoint<'a>>, // routing points
+    &'a str,         // layer name
+    Option<&'a str>, // TAPERRULE
+    Option<i32>,     // stylNum,
+    RouteBody<'a>,
+);
+
+pub type RegularWireStmt<'a> = (
+    i32, // 0: cover; 1: fixed; 2: routed; 3: noshield
+    Vec<RegularWireBasic<'a>>,
 );
 
 pub type Net<'a> = (
-    (&'a str, bool),               // netName, whether mustjoin
-    Vec<(&'a str, &'a str, bool)>, // componentName, pinName, whether pin from PIN macro.
-    Vec<&'a str>,                  // SHIELDNET
-    Vec<(
-        // VPIN
-        &'a str,                  // vpin name
-        Option<&'a str>,          // layer name
-        ((i32, i32), (i32, i32)), // vpin geometry
-        Option<i32>,              // 0: placed ; 1: fixed ; 2: covered
-        Option<(i32, i32)>,       // vpin location
-        Option<i32>,              // orient
-    )>,
-    Vec<(
-        // SUBNET
-        &'a str,                                                   // subnet name
-        Vec<(&'a str, &'a str)>,                                   // pinname or vpin name
-        Option<&'a str>,                                           // nondefaultrule
-        Option<(RegularWireBasic<'a>, Vec<RegularWireBasic<'a>>)>, // regular wiring
-    )>,
-    Option<i32>, //XTALK
-    Option<i32>, // FREQUENCY
-    NetProperty<'a>,
+    (
+        &'a str,                               // netName
+        Vec<(Option<&'a str>, &'a str, bool)>, // componentName, pinName, whether synthesized.
+    ), // basic
+    (
+        Vec<&'a str>,    // SHIELDNET
+        Vec<Vpin<'a>>,   // VPIN
+        Vec<SubNet<'a>>, // SUBNET
+        Option<i32>,     //XTALK
+        Option<&'a str>, // NONDEFAULTRULE
+        Vec<RegularWireStmt<'a>>,
+        NetProperty<'a>,
+    ), // feature
+);
+
+pub type Vpin<'a> = (
+    // VPIN
+    &'a str,                  // vpin name
+    &'a str,                  // layer name
+    ((i32, i32), (i32, i32)), // vpin geometry
+    i32,                      // 0: placed ; 1: fixed ; 2: covered
+    (i32, i32),               // vpin location
+    i32,                      // orient
+);
+
+pub type SubNet<'a> = (
+    // SUBNET
+    (
+        &'a str, // subnet name
+        Vec<(
+            Option<&'a str>, // compName or None
+            Option<&'a str>, // VPIN name or None
+            Option<&'a str>, // PIN name
+        )>,
+    ), // basic
+    (
+        Option<&'a str>,          // nondefaultrule
+        Vec<RegularWireStmt<'a>>, // regular wiring
+    ), // feature
 );
 
 // Special Net
-
-#[derive(Debug)]
-pub enum WireOption<'a> {
-    Cover(bool),
-    Fixed(bool),
-    Routed(bool),
-    Shield(&'a str),
-}
-
-#[derive(Debug)]
-pub enum WireShape {
-    Ring,
-    PadRing,
-    BlockRing,
-    Stripe,
-    FollowPin,
-    IOWire,
-    CoreWire,
-    BlockWire,
-    BlockageWire,
-    FillWire,
-    FillWireOpc,
-    DrcFill,
-}
-
 pub type SpecialWireBasic<'a> = (
-    Option<WireOption<'a>>,
-    (&'a str, i32),
-    Option<WireShape>,
-    Option<i32>,
-    Vec<RoutingPoint<'a>>,
+    &'a str,     // layer name
+    i32,         // route width
+    Option<i32>, // shape code
+    Option<i32>, // stylNum,
+    RouteBody<'a>,
 );
+
+pub enum SpecialWireStmt<'a> {
+    Polygon((&'a str, Pts)),
+    Rect((&'a str, Rect)),
+    Route(
+        (
+            i32, // location attribute
+            Vec<SpecialWireBasic<'a>>,
+        ),
+    ),
+}
 
 pub type SNet<'a> = (
-    &'a str,                       // special netName
-    Vec<(&'a str, &'a str, bool)>, // componentName, pinName, whether pin from PIN macro.
-    Option<f64>,                   // volts
-    Option<(SpecialWireBasic<'a>, Vec<SpecialWireBasic<'a>>)>,
-    NetProperty<'a>,
+    (
+        &'a str,                               // special netName
+        Vec<(Option<&'a str>, &'a str, bool)>, // componentName, pinName, whether synthesized.
+    ), // basic
+    (
+        Option<i32>, // volts
+        Vec<SpecialWireStmt<'a>>,
+        SNetProperty<'a>,
+    ), // feature
 );
 
-// NetProperty that commonly used in NET and Special Net
+// NetProperty that used in NET
 pub type NetProperty<'a> = (
     Option<i32>,     //SOURCE. 0: DIST; 1: NETLIST; 2:TEST; 3:TIMING; 4:USER
     bool,            // FIXEDBUMP
+    Option<f64>,     // FREQUENCY
     Option<&'a str>, // ORIGINAL
     Option<i32>, // USE. 0: ANALOG; 1:CLOCK; 2:GROUND; 3:POWER; 4:RESET; 5: SCAN; 6:SIGNAL; 7: TIEOFF
     Option<i32>, // PATTERN. 0: BALANCED; 1:STEINER; 2:TRUNK; 3:WIREDLOGIC
+    Option<i32>, // ESTCAP
+    Option<i32>, // WEIGHT
+    Properties<'a>,
+);
+
+// NetProperty that used in Special Net
+pub type SNetProperty<'a> = (
+    i32,             //SOURCE. 0: DIST; 1: NETLIST; 2:TEST; 3:TIMING; 4:USER
+    bool,            // FIXEDBUMP
+    Option<&'a str>, // ORIGINAL
+    i32, // USE. 0: ANALOG; 1:CLOCK; 2:GROUND; 3:POWER; 4:RESET; 5: SCAN; 6:SIGNAL; 7: TIEOFF
+    i32, // PATTERN. 0: BALANCED; 1:STEINER; 2:TRUNK; 3:WIREDLOGIC
     Option<i32>, // ESTCAP
     Option<i32>, // WEIGHT
     Properties<'a>,
@@ -265,4 +384,74 @@ pub type NetProperty<'a> = (
 pub type Style = (
     i32, // style number
     Pts,
+);
+
+// Pin
+pub type Pin<'a> = (
+    (&'a str, &'a str), // pinName & netName
+    (
+        bool,            // Whether special
+        Option<i32>,     // direction
+        Option<&'a str>, // NetExpre
+        Option<&'a str>, // PowerPin name
+        Option<&'a str>, // GroundPin name
+        Option<i32>,     // pin mode
+        // antenna not supported
+        Port<'a>,
+    ), //
+);
+
+// #[derive(Debug, PartialEq)]
+// pub enum PinAntenna<'a> {
+//     PartialMetalArea((i32, Option<&'a str>)),
+//     PartialMetalSideArea((i32, Option<&'a str>)),
+//     PartialCutArea((i32, Option<&'a str>)),
+//     DiffArea((i32, Option<&'a str>)),
+//     Model(Option<i32>),
+//     GateArea((i32, Option<&'a str>)),
+//     MaxAreaCar((i32, &'a str)),
+//     MaxSideAreaCar((i32, &'a str)),
+//     MaxCutCar((i32, &'a str)),
+// }
+
+#[derive(Debug)]
+pub enum Port<'a> {
+    ManyPorts(Vec<(Vec<PortElem<'a>>, Location)>),
+    SinglePort((Vec<PortElem<'a>>, Location)),
+}
+
+#[derive(Debug, PartialEq)]
+pub enum PortElem<'a> {
+    Layer((&'a str, Option<i32>, ((i32, i32), (i32, i32)))),
+    Polygon((&'a str, Option<i32>, Vec<(i32, i32)>)),
+    Via((&'a str, (i32, i32))),
+}
+
+pub type ScanChain<'a> = (
+    &'a str,                        // name
+    Option<(&'a str, Option<i32>)>, // partition
+    Option<(
+        &'a str, // IN pin
+        &'a str, // OUT PIN
+    )>, // commonscanpins
+    Option<(
+        Option<&'a str>, // if from component, then has name; whether none
+        &'a str,         // pin name
+    )>, // start.
+    Option<(
+        &'a str,     // scancell
+        &'a str,     //  in pin
+        &'a str,     // out pin
+        Option<i32>, // max bits
+    )>, // float
+    Option<(
+        &'a str,     // scancell
+        &'a str,     // in pin
+        &'a str,     // out pin
+        Option<i32>, // max bits
+    )>, // ordered
+    Option<(
+        Option<&'a str>, // if from component, then has name; whether none
+        &'a str,         // pin name
+    )>, // stop.
 );

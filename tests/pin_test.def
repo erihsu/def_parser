@@ -1,0 +1,19 @@
+PINS 11 ;
+- P0 + NET N0
+  + SPECIAL
+  + DIRECTION INPUT
+  + SUPPLYSENSITIVITY P1
+  + GROUNDSENSITIVITY P2
+  + USE SIGNAL
+    + PORT
+    + LAYER M2 ( 0 0 ) ( 30 135 )
+    + VIA VIAGEN12_0 ( 0 100 )
+    + FIXED ( 45 -2160 ) N
+  + PORT
+    + LAYER M1 ( 0 0 ) ( 30 135 )
+    + VIA M1_M2 ( 100 0 )
+    + COVER ( 0 -1000 ) N
+  + PORT
+    + LAYER M3 ( 0 0 ) ( 30 135 )
+    + PLACED ( 1000 -1000 ) N;
+END PINS

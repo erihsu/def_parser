@@ -33,10 +33,27 @@ pub fn tstring(input: &str) -> IResult<&str, &str> {
     )))(input)
 }
 
+// // allow tstring preceded with number
+pub fn itstring(input: &str) -> IResult<&str, &str> {
+    ws(recognize(pair(
+        alt((alpha1, tag("_"), digit1)),
+        many0(alt((alphanumeric1, tag("_")))),
+    )))(input)
+}
+
 // // parse string that is surrounded by " and ".
 // // ie, "abc", "def"
 pub fn qstring(input: &str) -> IResult<&str, &str> {
     ws(recognize(delimited(tag("\""), tstring, tag("\""))))(input)
+}
+
+// use for component pattern recognize
+pub fn component_pattern(input: &str) -> IResult<&str, &str> {
+    ws(recognize(tuple((
+        alt((alpha1, tag("_"))),
+        many0(alt((alphanumeric1, tag("_")))),
+        opt(tag("*")),
+    ))))(input)
 }
 
 // // signed integer number

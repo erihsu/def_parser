@@ -1,0 +1,41 @@
+SCANCHAINS 2 ;
+- chain1
+  + PARTITION clock1 MAXBITS 256 
+  + COMMONSCANPINS ( IN PA1 ) ( OUT PA2 )
+  + START I1 B
+  + STOP  I4 B
+  + ORDERED 
+     scancell1 ( IN PA2 )
+     scancell2 ( OUT PA10 )
+     ( BITS 4 )
+  + FLOATING
+     scancell3 ( IN PA2 )
+     scancell4 ( OUT PA10 )
+     ( BITS 4 ) ;
+- chain2
+  + PARTITION clock1 MAXBITS 256 
+  + COMMONSCANPINS ( IN PA1 ) ( OUT PA2 )
+  + START PIN scanpin
+  + STOP  PIN scanpin2
+  + ORDERED 
+     scancell5 ( IN PA2 )
+     scancell6 ( OUT PA10 )
+     ( BITS 4 )
+  + FLOATING
+     scancell7 ( IN PA2 )
+     scancell8 ( OUT PA10 )
+     ( BITS 4 ) ;
+- chain3
+  + PARTITION clock1 MAXBITS 256 
+  + COMMONSCANPINS ( IN PA1 ) ( OUT PA2 )
+  + START I5 B
+  + STOP  I6 B
+  + ORDERED 
+     scancell9 ( IN PA2 )
+     scancell10 ( OUT PA10 )
+     ( BITS 4 )
+  + FLOATING
+     scancell11 ( IN PA2 )
+     scancell12 ( OUT PA10 )
+     ( BITS 4 ) ;
+END SCANCHAINS

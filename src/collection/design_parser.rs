@@ -9,9 +9,23 @@ use nom::IResult;
 
 // def
 use crate::def_parser::base::{float, number, qstring, tstring, ws};
-use crate::def_parser::common::{on_or_off, orient, pt_list, x_or_y};
+use crate::def_parser::common::{pt_list, x_or_y};
+use crate::def_parser::encoder::orient_encode;
 
-// design block parsers
+pub fn divider_char(input: &str) -> IResult<&str, &str> {
+    delimited(
+        ws(tag("DIVIDERCHAR")),
+        alt((ws(tag("/")), ws(tag("\\")), ws(tag("%")), ws(tag("$")))),
+        ws(tag(";")),
+    )(input)
+}
+pub fn busbit_chars(input: &str) -> IResult<&str, &str> {
+    delimited(
+        ws(tag("BUSBITCHARS")),
+        alt((ws(tag("[]")), ws(tag("{}")), ws(tag("<>")))),
+        ws(tag(";")),
+    )(input)
+}
 
 // parse version number
 pub fn version_num(
@@ -26,20 +40,20 @@ pub fn version_num(
 // parse namecase sensitivity
 // Return: if namecase sensitivity
 //         data_type: bool
-pub fn names_case_sensitivity(
-    input: &str,
-) -> IResult<
-    &str,
-    bool, // if namecase sensitivity
-> {
-    map(
-        delimited(ws(tag("NAMESCASESENSITIVE")), on_or_off, ws(tag(";"))),
-        |s: &str| match s {
-            "ON" => true,
-            _ => false,
-        },
-    )(input)
-}
+// pub fn names_case_sensitivity(
+//     input: &str,
+// ) -> IResult<
+//     &str,
+//     bool, // if namecase sensitivity
+// > {
+//     map(
+//         delimited(ws(tag("NAMESCASESENSITIVE")), on_or_off, ws(tag(";"))),
+//         |s: &str| match s {
+//             "ON" => true,
+//             _ => false,
+//         },
+//     )(input)
+// }
 
 // parse design name
 // Return: design name
@@ -147,7 +161,7 @@ pub fn row_rule_def_list(
             preceded(ws(tag("ROW")), tstring),
             row_type,
             pair(number, number),
-            orient,
+            orient_encode,
             tuple((
                 preceded(ws(tag("DO")), number),
                 preceded(ws(tag("BY")), number),
