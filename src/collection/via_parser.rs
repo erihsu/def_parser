@@ -57,13 +57,14 @@ fn via_member(input: &str) -> IResult<&str, Via> {
                     |n| ViaBody::Generated(n),
                 ),
                 map(
-                    many0(tuple((
-                        tstring,
-                        alt((
-                            map(preceded(ws(tag("+ RECT")), rect), |n| Geometry::Rect(n)),
-                            map(preceded(ws(tag("+ POLYGON")), pt_list), |n| {
-                                Geometry::Polygon(n)
-                            }),
+                    many0(alt((
+                        tuple((
+                            preceded(ws(tag("+ RECT")), tstring),
+                            map(rect, |u| Geometry::Rect(u)),
+                        )),
+                        tuple((
+                            preceded(ws(tag("+ POLYGON")), tstring),
+                            map(pt_list, |u| Geometry::Polygon(u)),
                         )),
                     ))),
                     |n| ViaBody::Fixed(n),
@@ -72,4 +73,23 @@ fn via_member(input: &str) -> IResult<&str, Via> {
         ),
         ws(tag(";")),
     )(input)
+}
+
+#[cfg(test)]
+mod tests {
+
+    use crate::def_parser::via_parser::*;
+    use std::io::Read;
+
+    #[test]
+    fn test_via_section() {
+        let mut input_def = std::fs::File::open("tests/via_test.def").unwrap();
+        let mut data = String::new();
+        input_def.read_to_string(&mut data).unwrap();
+        let result = via_section(&data).unwrap();
+        let via_section = result.1;
+        let num = via_section.0;
+        let _vias = via_section.1;
+        assert_eq!(num, 6);
+    }
 }
