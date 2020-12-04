@@ -1,4 +1,5 @@
 // nom
+
 use nom::bytes::complete::tag;
 use nom::combinator::{map, opt};
 use nom::multi::many0;
@@ -7,9 +8,11 @@ use nom::IResult;
 
 // def
 use crate::def_parser::base::{number, tstring, ws};
-use crate::def_parser::common::{comp_name, properties};
+use crate::def_parser::common::{comp_name, properties, pt_new};
 use crate::def_parser::def_types::Component;
-use crate::def_parser::encoder::source_type_encode;
+use crate::def_parser::encoder::{
+    component_location_attribute_encode, orient_encode, source_type_encode,
+};
 
 pub fn component_section(
     input: &str,
@@ -37,12 +40,13 @@ fn component_member(input: &str) -> IResult<&str, Component> {
             tuple((comp_name, tstring)),
             tuple((
                 opt(preceded(ws(tag("+ EEQMASTER")), tstring)),
-                opt(preceded(ws(tag("+ GENERATE")), tstring)),
-                opt(preceded(ws(tag("+")), source_type_encode)),
-                // foreign
+                opt(source_type_encode),
+                tuple((
+                    component_location_attribute_encode,
+                    opt(tuple((pt_new, orient_encode))),
+                )),
                 opt(preceded(ws(tag("+ WEIGHT")), number)),
                 opt(preceded(ws(tag("+ REGION")), tstring)),
-                //opt(preceded(ws(tag("+ MASKSHIFT")), tstring)),
                 opt(tuple((
                     map(
                         preceded(ws(tag("+ HALO")), opt(ws(tag("SOFT")))),

@@ -2,7 +2,7 @@
 use nom::bytes::complete::tag;
 use nom::combinator::{map, opt};
 use nom::multi::many0;
-use nom::sequence::{delimited, pair, preceded, terminated, tuple};
+use nom::sequence::{delimited, preceded, terminated, tuple};
 use nom::IResult;
 
 // def
@@ -28,70 +28,66 @@ pub fn scanchain_section(
 fn scanchain_member(input: &str) -> IResult<&str, ScanChain> {
     delimited(
         tag("-"),
-        pair(
+        tuple((
             tstring, // name
-            tuple((
-                opt(preceded(
-                    ws(tag("+ PARTITION")),
-                    tuple((tstring, preceded(tag("MAXBITS"), number))),
-                )),
-                opt(preceded(
-                    ws(tag("+ COMMONSCANPINS")),
-                    tuple((
-                        delimited(ws(tag("(")), preceded(tag("IN"), tstring), ws(tag(")"))),
-                        delimited(ws(tag("(")), preceded(tag("OUT"), tstring), ws(tag(")"))),
-                    )),
-                )), // commonscanpin
-                opt(preceded(
-                    ws(tag("+ START")),
-                    tuple((
-                        map(tstring, |n| match n {
-                            "PIN" => None,
-                            _ => Some(n),
-                        }),
-                        tstring,
-                    )),
-                )), // start
-                opt(preceded(
-                    ws(tag("+ FLOATING")),
-                    tuple((
-                        pair(
-                            tstring,
-                            delimited(ws(tag("(")), preceded(tag("IN"), tstring), ws(tag(")"))),
-                        ),
-                        pair(
-                            tstring,
-                            delimited(ws(tag("(")), preceded(tag("OUT"), tstring), ws(tag(")"))),
-                        ),
-                        delimited(ws(tag("(")), preceded(tag("BITS"), number), ws(tag(")"))),
-                    )),
-                )), // floating
-                opt(preceded(
-                    ws(tag("+ ORDERED")),
-                    tuple((
-                        pair(
-                            tstring,
-                            delimited(ws(tag("(")), preceded(tag("IN"), tstring), ws(tag(")"))),
-                        ),
-                        pair(
-                            tstring,
-                            delimited(ws(tag("(")), preceded(tag("OUT"), tstring), ws(tag(")"))),
-                        ),
-                        delimited(ws(tag("(")), preceded(tag("BITS"), number), ws(tag(")"))),
-                    )),
-                )), // ordered
-                opt(preceded(
-                    ws(tag("+ STOP")),
-                    tuple((
-                        map(tstring, |n| match n {
-                            "PIN" => None,
-                            _ => Some(n),
-                        }),
-                        tstring,
-                    )),
-                )), // stop
+            opt(preceded(
+                ws(tag("+ PARTITION")),
+                tuple((tstring, opt(preceded(tag("MAXBITS"), number)))),
             )),
-        ),
+            opt(preceded(
+                ws(tag("+ COMMONSCANPINS")),
+                tuple((
+                    delimited(ws(tag("(")), preceded(tag("IN"), tstring), ws(tag(")"))),
+                    delimited(ws(tag("(")), preceded(tag("OUT"), tstring), ws(tag(")"))),
+                )),
+            )), // commonscanpin
+            opt(preceded(
+                ws(tag("+ START")),
+                tuple((
+                    map(tstring, |n| match n {
+                        "PIN" => None,
+                        _ => Some(n),
+                    }),
+                    tstring,
+                )),
+            )), // start
+            opt(preceded(
+                ws(tag("+ FLOATING")),
+                tuple((
+                    tstring,
+                    delimited(ws(tag("(")), preceded(tag("IN"), tstring), ws(tag(")"))),
+                    delimited(ws(tag("(")), preceded(tag("OUT"), tstring), ws(tag(")"))),
+                    opt(delimited(
+                        ws(tag("(")),
+                        preceded(tag("BITS"), number),
+                        ws(tag(")")),
+                    )),
+                )),
+            )), // floating
+            opt(preceded(
+                ws(tag("+ ORDERED")),
+                tuple((
+                    tstring,
+                    delimited(ws(tag("(")), preceded(tag("IN"), tstring), ws(tag(")"))),
+                    delimited(ws(tag("(")), preceded(tag("OUT"), tstring), ws(tag(")"))),
+                    opt(delimited(
+                        ws(tag("(")),
+                        preceded(tag("BITS"), number),
+                        ws(tag(")")),
+                    )),
+                )),
+            )), // ordered
+            opt(preceded(
+                ws(tag("+ STOP")),
+                tuple((
+                    map(tstring, |n| match n {
+                        "PIN" => None,
+                        _ => Some(n),
+                    }),
+                    tstring,
+                )),
+            )), // stop
+        )),
         ws(tag(";")),
     )(input)
 }

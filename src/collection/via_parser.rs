@@ -1,15 +1,15 @@
 // nom
-use nom::branch::{alt, permutation};
+use nom::branch::alt;
 use nom::bytes::complete::tag;
 use nom::combinator::{map, opt};
 use nom::multi::many0;
-use nom::sequence::{delimited, preceded, terminated, tuple};
+use nom::sequence::{delimited, pair, preceded, terminated, tuple};
 use nom::IResult;
 
 // def
-use crate::def_parser::base::{float, number, qstring, tstring, ws};
-use crate::def_parser::common::pt_list;
-use crate::def_parser::parser_types::Via;
+use crate::def_parser::base::{number, tstring, ws};
+use crate::def_parser::common::{pt_list, rect};
+use crate::def_parser::def_types::{Geometry, Via, ViaBody};
 
 pub fn via_section(
     input: &str,
@@ -35,29 +35,41 @@ fn via_member(input: &str) -> IResult<&str, Via> {
         tag("-"),
         pair(
             tstring,
-            permutation((
-                opt(preceded(ws(tag("+ VIARULE")), tstring)),
-                opt(preceded(ws(tag("+ CUTSIZE")), tuple((number, number)))),
-                opt(preceded(
-                    ws(tag("+ LAYERS")),
-                    tuple((tstring, tstring, tstring)),
-                )),
-                opt(preceded(ws(tag("+ CUTSPACING")), tuple((number, number)))),
-                opt(preceded(
-                    ws(tag("+ ENCLOSURE")),
-                    tuple((number, number, number, number)),
-                )),
-                opt(preceded(ws(tag("+ ROWCOL")), tuple((number, number)))),
-                opt(preceded(ws(tag("+ ORIGIN")), tuple((number, number)))),
-                opt(preceded(ws(tag("+ OFFSET")), tuple((number, number)))),
-                opt(preceded(ws(tag("+ PATTERN")), tstring)),
-                many0(tuple((
-                    preceded(alt((ws(tag("+ RECT")), ws(tag("+ POLYGON")))), tstring),
-                    opt(preceded(ws(tag("+ MASK")), number)),
-                    pt_list,
-                ))),
+            alt((
+                map(
+                    tuple((
+                        preceded(ws(tag("+ VIARULE")), tstring),
+                        preceded(ws(tag("+ CUTSIZE")), tuple((number, number))),
+                        preceded(ws(tag("+ LAYERS")), tuple((tstring, tstring, tstring))),
+                        preceded(ws(tag("+ CUTSPACING")), tuple((number, number))),
+                        preceded(
+                            ws(tag("+ ENCLOSURE")),
+                            tuple((number, number, number, number)),
+                        ),
+                        opt(preceded(ws(tag("+ ROWCOL")), tuple((number, number)))),
+                        opt(preceded(ws(tag("+ ORIGIN")), tuple((number, number)))),
+                        opt(preceded(
+                            ws(tag("+ OFFSET")),
+                            tuple((number, number, number, number)),
+                        )),
+                        opt(preceded(ws(tag("+ PATTERN")), tstring)),
+                    )),
+                    |n| ViaBody::Generated(n),
+                ),
+                map(
+                    many0(tuple((
+                        tstring,
+                        alt((
+                            map(preceded(ws(tag("+ RECT")), rect), |n| Geometry::Rect(n)),
+                            map(preceded(ws(tag("+ POLYGON")), pt_list), |n| {
+                                Geometry::Polygon(n)
+                            }),
+                        )),
+                    ))),
+                    |n| ViaBody::Fixed(n),
+                ),
             )),
-            ws(tag(";")),
         ),
+        ws(tag(";")),
     )(input)
 }

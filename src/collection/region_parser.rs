@@ -1,5 +1,4 @@
 // nom
-use nom::branch::permutation;
 use nom::bytes::complete::tag;
 use nom::combinator::opt;
 use nom::multi::{many0, many1};
@@ -39,7 +38,7 @@ fn region_member(input: &str) -> IResult<&str, Region> {
                 tstring, // name
                 many1(rect),
             )),
-            permutation((opt(region_type_encode), properties)),
+            tuple((opt(region_type_encode), properties)),
         ),
         ws(tag(";")),
     )(input)

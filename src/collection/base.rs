@@ -47,6 +47,15 @@ pub fn qstring(input: &str) -> IResult<&str, &str> {
     ws(recognize(delimited(tag("\""), tstring, tag("\""))))(input)
 }
 
+// use for component pattern recognize
+pub fn component_pattern(input: &str) -> IResult<&str, &str> {
+    ws(recognize(tuple((
+        alt((alpha1, tag("_"))),
+        many0(alt((alphanumeric1, tag("_")))),
+        opt(tag("*")),
+    ))))(input)
+}
+
 // // signed integer number
 // // ie, 100, -20
 pub fn number(input: &str) -> IResult<&str, i32> {

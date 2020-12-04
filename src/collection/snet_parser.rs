@@ -1,5 +1,5 @@
 // nom
-use nom::branch::{alt, permutation};
+use nom::branch::alt;
 use nom::bytes::complete::tag;
 use nom::combinator::{map, opt};
 use nom::multi::{many0, many1};
@@ -8,8 +8,8 @@ use nom::sequence::{delimited, pair, preceded, terminated, tuple};
 use nom::IResult;
 
 // def
-use crate::def_parser::base::{float, number, tstring, ws};
-use crate::def_parser::common::{properties, route_body};
+use crate::def_parser::base::{number, tstring, ws};
+use crate::def_parser::common::{properties, pt_list, rect, route_body};
 use crate::def_parser::def_types::{SNet, SNetProperty, SpecialWireBasic, SpecialWireStmt};
 use crate::def_parser::encoder::{
     net_pattern_encode, snet_global_attribute_encode, snet_shape_encode, source_type_encode,
@@ -36,7 +36,10 @@ fn snet_member(input: &str) -> IResult<&str, SNet> {
                 many0(delimited(
                     ws(tag("(")),
                     tuple((
-                        tstring,
+                        map(tstring, |n| match n {
+                            "PIN" => None,
+                            n => Some(n),
+                        }),
                         tstring,
                         map(
                             opt(ws(tag("+ SYNTHESIZED"))),
@@ -49,9 +52,9 @@ fn snet_member(input: &str) -> IResult<&str, SNet> {
                     ws(tag(")")),
                 )),
             )),
-            permutation((
-                opt(preceded(ws(tag("+ VOLTAGE")), float)),
-                special_wiring,
+            tuple((
+                opt(preceded(ws(tag("+ VOLTAGE")), number)),
+                many0(special_wiring),
                 snet_property,
             )),
         ),
@@ -74,25 +77,37 @@ fn special_wire_basic(input: &str) -> IResult<&str, SpecialWireBasic> {
 }
 
 fn special_wiring(input: &str) -> IResult<&str, SpecialWireStmt> {
-    many0(tuple((
-        preceded(ws(tag("+")), snet_global_attribute_encode),
-        many1(alt((
-            preceded(ws(tag("NEW")), special_wire_basic),
-            special_wire_basic,
-        ))),
-    )))(input)
+    alt((
+        map(preceded(ws(tag("+ RECT")), tuple((tstring, rect))), |n| {
+            SpecialWireStmt::Rect(n)
+        }),
+        map(
+            preceded(ws(tag("+ POLYGON")), tuple((tstring, pt_list))),
+            |n| SpecialWireStmt::Polygon(n),
+        ),
+        map(
+            tuple((
+                snet_global_attribute_encode,
+                many1(alt((
+                    preceded(ws(tag("NEW")), special_wire_basic),
+                    special_wire_basic,
+                ))),
+            )),
+            |n| SpecialWireStmt::Route(n),
+        ),
+    ))(input)
 }
 
 fn snet_property(input: &str) -> IResult<&str, SNetProperty> {
-    permutation((
-        preceded(ws(tag("+")), source_type_encode),
+    tuple((
+        source_type_encode,
         map(opt(ws(tag("+ FIXEDBUMP"))), |res: Option<&str>| match res {
             Some(_) => true,
             None => false,
         }),
         opt(preceded(ws(tag("+ ORIGINAL")), tstring)),
-        preceded(ws(tag("+")), use_mode_encode),
-        preceded(ws(tag("+")), net_pattern_encode),
+        use_mode_encode,
+        net_pattern_encode,
         opt(preceded(ws(tag("+ ESTCAP")), number)),
         opt(preceded(ws(tag("+ WEIGHT")), number)),
         properties,

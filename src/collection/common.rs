@@ -1,6 +1,6 @@
 use nom::branch::alt;
 
-use nom::bytes::complete::{is_not, tag};
+use nom::bytes::complete::tag;
 use nom::character::complete::{char, space0};
 use nom::combinator::{map, opt, recognize};
 
@@ -87,21 +87,21 @@ pub fn pt_list(input: &str) -> IResult<&str, Vec<(i32, i32)>> {
     })(input)
 }
 
-pub fn rect_list(input: &str) -> IResult<&str, Vec<((i32, i32), (i32, i32))>> {
-    many1(rect)(input)
-}
+// pub fn rect_list(input: &str) -> IResult<&str, Vec<((i32, i32), (i32, i32))>> {
+//     many1(rect)(input)
+// }
 
 pub fn x_or_y(input: &str) -> IResult<&str, char> {
     alt((char('X'), char('Y')))(input)
 }
 
-pub fn on_or_off(input: &str) -> IResult<&str, &str> {
-    alt((tag("ON"), tag("OFF")))(input)
-}
+// pub fn on_or_off(input: &str) -> IResult<&str, &str> {
+//     alt((tag("ON"), tag("OFF")))(input)
+// }
 
-pub fn inline_comment(input: &str) -> IResult<&str, &str> {
-    delimited(tag("#"), is_not("\n"), tag("\n"))(input)
-}
+// pub fn inline_comment(input: &str) -> IResult<&str, &str> {
+//     delimited(tag("#"), is_not("\n"), tag("\n"))(input)
+// }
 
 // different from tstring and qstring, comp_name might contain hierachical struct and bus bit information
 // ie, i1/i2[2]/i3.

@@ -54,3 +54,12 @@ pub mod pin_parser;
 
 #[path = "collection/scanchain_parser.rs"]
 pub mod scanchain_parser;
+
+#[path = "collection/via_parser.rs"]
+pub mod via_parser;
+
+#[path = "collection/design_config.rs"]
+pub mod design_config;
+
+#[path = "collection/header_parser.rs"]
+pub mod header_section;

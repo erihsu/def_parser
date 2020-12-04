@@ -87,10 +87,10 @@ pub fn net_pattern_encode(input: &str) -> IResult<&str, i32> {
 
 pub fn snet_global_attribute_encode(input: &str) -> IResult<&str, i32> {
     ws(alt((
-        map(tag("COVER"), |_| 0),
-        map(tag("FIXED"), |_| 1),
-        map(tag("ROUTED"), |_| 2),
-        map(tag("SHIELD"), |_| 3),
+        map(ws(tag("+ COVER")), |_| 0),
+        map(ws(tag("+ FIXED")), |_| 1),
+        map(ws(tag("+ ROUTED")), |_| 2),
+        map(ws(tag("+ SHIELD")), |_| 3),
     )))(input)
 }
 
@@ -105,9 +105,9 @@ pub fn net_global_attribute_encode(input: &str) -> IResult<&str, i32> {
 
 pub fn pin_location_attribute_encode(input: &str) -> IResult<&str, i32> {
     ws(alt((
-        map(tag("PLACED"), |_| 0),
-        map(tag("FIXED"), |_| 1),
-        map(tag("COVER"), |_| 2),
+        map(ws(tag("+ PLACED")), |_| 0),
+        map(ws(tag("+ FIXED")), |_| 1),
+        map(ws(tag("+ COVER")), |_| 2),
     )))(input)
 }
 
@@ -137,4 +137,13 @@ pub fn region_type_encode(input: &str) -> IResult<&str, i32> {
         ws(tag("+ TYPE")),
         alt((map(tag("FENCE"), |_| 0), map(tag("GUIDE"), |_| 1))),
     ))(input)
+}
+
+pub fn component_location_attribute_encode(input: &str) -> IResult<&str, i32> {
+    ws(alt((
+        map(ws(tag("+ FIXED")), |_| 0),
+        map(ws(tag("+ COVER")), |_| 1),
+        map(ws(tag("+ PLACED")), |_| 2),
+        map(ws(tag("+ UNPLACED")), |_| 3),
+    )))(input)
 }
