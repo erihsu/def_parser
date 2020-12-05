@@ -3,7 +3,7 @@ extern crate nom;
 pub use collection::blockage_parser::blockage_section;
 pub use collection::component_parser::component_section;
 pub use collection::def_types::*;
-pub use collection::design_config::design_config;
+pub use collection::design_config_parser::design_config;
 pub use collection::fill_parser::fill_section;
 pub use collection::group_parser::group_section;
 pub use collection::header_parser::header_section;
@@ -17,5 +17,6 @@ pub use collection::scanchain_parser::scanchain_section;
 pub use collection::slot_parser::slot_section;
 pub use collection::snet_parser::snet_section;
 pub use collection::style_parser::style_section;
+pub use collection::via_parser::via_section;
 
 pub mod collection;

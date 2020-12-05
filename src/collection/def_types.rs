@@ -1,78 +1,53 @@
 // Define reusable type alias
 
 pub type DesignConfig<'a> = (
-    &'a str,         // design name
-    Option<&'a str>, // technology name
-    Option<i32>,     // units
-    Option<
-        Vec<(
-            &'a str, // object type of property. ie, design, region, group, component,...
-            &'a str, // property name
-            (
-                char,    // data type of property
-                bool,    // whether has range
-                bool,    // whether has number
-                bool,    // whether has name_map_string
-                &'a str, // string data if belongs to 'S' data type
-                f64,     // left boarder of range if has range
-                f64,     // right boarder of range if has range
-                f64,     // data if has number
-            ),
-        )>,
-    >, // propdef
-    Option<Vec<(i32, i32)>>, // die area
-    Option<
-        Vec<(
-            (
-                &'a str, // name of row rule
-                &'a str, // row rule type
-                (
-                    i32, //  the origin of rule scope along axis X
-                    i32, // the origin of rule scope along axis Y
-                ),
-                i32, // orient of row rule
-                (
-                    i32, // step number along axis X
-                    i32, // step number along axis Y
-                    i32, // step size along axis X
-                    i32, // step size along axis Y
-                ),
-            ),
-            (
-                Vec<&'a str>, // property name of row rule
-                Vec<&'a str>, // property value(String type) of row rule
-                Vec<f64>,     // property value(real type) of row rule
-                i32,          // number of property of row rule
-            ),
-        )>,
-    >, // rows
-    Option<
-        Vec<(
-            (
-                char, // axis. 'X' or 'Y'
-                i32,  // the origin of gcell grid along axis X/Y
-                i32,  // the step number of track
-                i32,  // the step size of track
-            ),
-            (
-                Option<i32>,          // mask number of the track. optional
-                Option<bool>,         // whether the samemask. optional
-                Option<Vec<&'a str>>, // the metal layer of track
-            ),
-        )>,
-    >, // tracks
-    Option<
-        Vec<(
-            char, // axis. 'X' or 'Y'
-            i32,  // the origin of gcell grid along axis X/Y
-            i32,  // the step number of gcell grid
-            i32,  // the step size of gcell grid
-        )>,
-    >, // gcellgrid
+    &'a str,                  // design name
+    Option<&'a str>,          // technology name
+    Option<i32>,              // units
+    Option<Vec<PropDef<'a>>>, // propdef
+    Option<Vec<(i32, i32)>>,  // die area
+    Option<Vec<Row<'a>>>,     // rows
+    Option<Vec<Track<'a>>>,   // tracks
+    Option<Vec<GcellGrid>>,   // gcellgrid
+);
+
+pub type PropDef<'a> = (
+    &'a str, // object type of property. ie, design, region, group, component,...
+    &'a str, // property name
     (
-        i32, // viaNum
-        Vec<Via<'a>>,
-    ), // via
+        char, // data type of property
+        Option<&'a str>,
+        Option<(i32, Option<(i32, i32)>)>,
+        Option<(f64, Option<(f64, f64)>)>,
+    ),
+);
+
+pub type Row<'a> = (
+    &'a str, // name of row rule
+    &'a str, // row rule type
+    i32,     //  the origin of rule scope along axis X
+    i32,     // the origin of rule scope along axis Y
+    i32,     // orient of row rule
+    i32,     // step number along axis X
+    i32,     // step number along axis Y
+    i32,     // step size along axis X
+    i32,     // step size along axis Y
+    Option<Properties<'a>>,
+);
+
+pub type Track<'a> = (
+    char,                 // axis. 'X' or 'Y'
+    i32,                  // the origin of gcell grid along axis X/Y
+    i32,                  // the step number of track
+    i32,                  // the step size of track
+    Option<Vec<&'a str>>, // the metal layer of track
+);
+
+pub type GcellGrid = (
+    char, // axis. 'X' or 'Y'
+    i32,  // the origin of gcell grid along axis X/Y
+    i32,  // the step number of gcell grid
+    i32,  // the step size of gcell grid
 );
 
 pub type Properties<'a> = Vec<(

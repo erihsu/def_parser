@@ -92,22 +92,22 @@ fn scanchain_member(input: &str) -> IResult<&str, ScanChain> {
     )(input)
 }
 
-#[cfg(test)]
-mod tests {
+// #[cfg(test)]
+// mod tests {
 
-    use crate::collection::scanchain_parser::*;
-    use std::io::Read;
+//     use crate::collection::scanchain_parser::*;
+//     use std::io::Read;
 
-    #[test]
-    fn test_scanchain_section() {
-        let mut input_def = std::fs::File::open("tests/scanchain_test.def").unwrap();
-        let mut data = String::new();
-        input_def.read_to_string(&mut data).unwrap();
-        let result = scanchain_section(&data).unwrap();
+//     #[test]
+//     fn test_scanchain_section() {
+//         let mut input_def = std::fs::File::open("tests/scanchain_test.def").unwrap();
+//         let mut data = String::new();
+//         input_def.read_to_string(&mut data).unwrap();
+//         let result = scanchain_section(&data).unwrap();
 
-        let scanchain_section = result.1;
+//         let scanchain_section = result.1;
 
-        let num = scanchain_section.0;
-        let ndrs = scanchain_section.1;
-    }
-}
+//         let num = scanchain_section.0;
+//         let ndrs = scanchain_section.1;
+//     }
+// }
