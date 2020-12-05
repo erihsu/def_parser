@@ -7,10 +7,12 @@ use nom::sequence::{delimited, pair, preceded, terminated, tuple};
 use nom::IResult;
 
 // def
-use super::base::{number, tstring, ws};
-use super::common::{comp_name, properties, pt_new};
-use super::def_types::Component;
-use super::encoder::{component_location_attribute_encode, orient_encode, source_type_encode};
+use crate::def_parser::base::{number, tstring, ws};
+use crate::def_parser::common::{comp_name, properties, pt_new};
+use crate::def_parser::def_types::Component;
+use crate::def_parser::encoder::{
+    component_location_attribute_encode, orient_encode, source_type_encode,
+};
 
 pub fn component_section(
     input: &str,

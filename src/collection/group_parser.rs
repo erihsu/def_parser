@@ -7,9 +7,9 @@ use nom::sequence::{delimited, preceded, terminated, tuple};
 use nom::IResult;
 
 // def
-use super::base::{component_pattern, number, tstring, ws};
-use super::common::properties;
-use super::def_types::Group;
+use crate::def_parser::base::{component_pattern, number, tstring, ws};
+use crate::def_parser::common::properties;
+use crate::def_parser::def_types::Group;
 
 pub fn group_section(
     input: &str,

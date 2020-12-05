@@ -6,8 +6,8 @@ use nom::sequence::{delimited, preceded, terminated, tuple};
 use nom::IResult;
 
 // def
-use super::base::{number, tstring, ws};
-use super::def_types::ScanChain;
+use crate::def_parser::base::{number, tstring, ws};
+use crate::def_parser::def_types::ScanChain;
 
 pub fn scanchain_section(
     input: &str,
@@ -90,24 +90,4 @@ fn scanchain_member(input: &str) -> IResult<&str, ScanChain> {
         )),
         ws(tag(";")),
     )(input)
-}
-
-#[cfg(test)]
-mod tests {
-
-    use crate::collection::scanchain_parser::*;
-    use std::io::Read;
-
-    #[test]
-    fn test_scanchain_section() {
-        let mut input_def = std::fs::File::open("tests/scanchain_test.def").unwrap();
-        let mut data = String::new();
-        input_def.read_to_string(&mut data).unwrap();
-        let result = scanchain_section(&data).unwrap();
-
-        let scanchain_section = result.1;
-
-        let num = scanchain_section.0;
-        let ndrs = scanchain_section.1;
-    }
 }

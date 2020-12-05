@@ -5,7 +5,7 @@ use nom::combinator::map;
 use nom::sequence::preceded;
 use nom::IResult;
 
-use super::base::ws;
+use crate::def_parser::base::ws;
 
 pub fn orient_encode(input: &str) -> IResult<&str, i32> {
     ws(alt((

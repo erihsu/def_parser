@@ -6,10 +6,10 @@ use nom::sequence::{delimited, pair, terminated, tuple};
 use nom::IResult;
 
 // def
-use super::base::{number, tstring, ws};
-use super::common::{properties, rect};
-use super::def_types::Region;
-use super::encoder::region_type_encode;
+use crate::def_parser::base::{number, tstring, ws};
+use crate::def_parser::common::{properties, rect};
+use crate::def_parser::def_types::Region;
+use crate::def_parser::encoder::region_type_encode;
 
 pub fn region_section(
     input: &str,
@@ -46,8 +46,8 @@ fn region_member(input: &str) -> IResult<&str, Region> {
 
 #[cfg(test)]
 mod tests {
-    use crate::collection::def_types::*;
-    use crate::collection::region_parser::*;
+    use crate::def_parser::def_types::*;
+    use crate::def_parser::region_parser::*;
     use std::io::Read;
 
     #[test]

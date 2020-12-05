@@ -7,10 +7,12 @@ use nom::sequence::{delimited, pair, preceded, terminated, tuple};
 use nom::IResult;
 
 // def
-use super::base::{float, itstring, number, tstring, ws};
-use super::common::{properties, pt_new, rect, route_body};
-use super::def_types::{Net, NetProperty, RegularWireBasic, RegularWireStmt, SubNet, Vpin};
-use super::encoder::{
+use crate::def_parser::base::{float, itstring, number, tstring, ws};
+use crate::def_parser::common::{properties, pt_new, rect, route_body};
+use crate::def_parser::def_types::{
+    Net, NetProperty, RegularWireBasic, RegularWireStmt, SubNet, Vpin,
+};
+use crate::def_parser::encoder::{
     net_global_attribute_encode, net_pattern_encode, orient_encode, pin_location_attribute_encode,
     source_type_encode, use_mode_encode,
 };
