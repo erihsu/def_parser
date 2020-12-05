@@ -5,9 +5,9 @@ use nom::sequence::{delimited, preceded, terminated, tuple};
 use nom::IResult;
 
 // def
-use crate::def_parser::base::{number, tstring, ws};
-use crate::def_parser::common::rect_or_polygon;
-use crate::def_parser::def_types::Slot;
+use super::base::{number, tstring, ws};
+use super::common::rect_or_polygon;
+use super::def_types::Slot;
 
 pub fn slot_section(
     input: &str,
@@ -35,8 +35,8 @@ fn slot_member(input: &str) -> IResult<&str, Slot> {
 
 #[cfg(test)]
 mod tests {
-    use crate::def_parser::def_types::*;
-    use crate::def_parser::slot_parser::*;
+    use crate::collection::def_types::*;
+    use crate::collection::slot_parser::*;
     use std::io::Read;
 
     #[test]

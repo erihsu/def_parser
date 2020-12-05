@@ -7,9 +7,9 @@ use nom::sequence::{delimited, pair, preceded, terminated, tuple};
 use nom::IResult;
 
 // def
-use crate::def_parser::base::{number, tstring, ws};
-use crate::def_parser::common::properties;
-use crate::def_parser::def_types::Ndr;
+use super::base::{number, tstring, ws};
+use super::common::properties;
+use super::def_types::Ndr;
 
 pub fn ndr_section(
     input: &str,

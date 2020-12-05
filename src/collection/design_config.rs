@@ -2,12 +2,12 @@ use nom::combinator::opt;
 use nom::sequence::tuple;
 use nom::IResult;
 
-use crate::def_parser::def_types::DesignConfig;
-use crate::def_parser::design_parser::{
+use super::def_types::DesignConfig;
+use super::design_parser::{
     design_name, die_area, gcellgrid_list, prop_def_section, row_rule_def_list, technology_name,
     tracks_rule_list, units,
 };
-use crate::def_parser::via_parser::via_section;
+use super::via_parser::via_section;
 
 pub fn design_config(input: &str) -> IResult<&str, DesignConfig> {
     tuple((
