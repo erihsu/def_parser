@@ -7,9 +7,9 @@ use nom::sequence::{delimited, preceded, terminated, tuple};
 use nom::IResult;
 
 // def
-use crate::def_parser::base::{number, tstring, ws};
-use crate::def_parser::common::{pt_list, rect_or_polygon};
-use crate::def_parser::def_types::Fill;
+use super::base::{number, tstring, ws};
+use super::common::{pt_list, rect_or_polygon};
+use super::def_types::Fill;
 
 pub fn fill_section(
     input: &str,
@@ -61,7 +61,7 @@ fn fill_member(input: &str) -> IResult<&str, Fill> {
 #[cfg(test)]
 mod tests {
 
-    use crate::def_parser::fill_parser::*;
+    use crate::collection::fill_parser::*;
     use std::io::Read;
 
     #[test]
@@ -74,7 +74,7 @@ mod tests {
         let fill_section = result.1;
 
         let num = fill_section.0;
-        let fills = fill_section.1;
+        let _fills = fill_section.1;
 
         assert_eq!(num, 5);
         // assert_eq!(

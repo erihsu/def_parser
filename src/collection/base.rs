@@ -99,7 +99,7 @@ pub fn decimal(input: &str) -> IResult<&str, &str> {
 
 #[cfg(test)]
 mod tests {
-    use crate::def_parser::base::*;
+    use crate::collection::base::*;
 
     #[test]
     fn test_float() {
