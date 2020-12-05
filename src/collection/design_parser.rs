@@ -8,9 +8,9 @@ use nom::sequence::{delimited, pair, preceded, terminated, tuple};
 use nom::IResult;
 
 // def
-use super::base::{float, number, qstring, tstring, ws};
-use super::common::{pt_list, x_or_y};
-use super::encoder::orient_encode;
+use crate::def_parser::base::{float, number, qstring, tstring, ws};
+use crate::def_parser::common::{pt_list, x_or_y};
+use crate::def_parser::encoder::orient_encode;
 
 pub fn divider_char(input: &str) -> IResult<&str, &str> {
     delimited(

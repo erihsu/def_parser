@@ -5,9 +5,9 @@ use nom::sequence::{delimited, terminated, tuple};
 use nom::IResult;
 
 // def
-use super::base::{number, ws};
-use super::common::pt_list;
-use super::def_types::Style;
+use crate::def_parser::base::{number, ws};
+use crate::def_parser::common::pt_list;
+use crate::def_parser::def_types::Style;
 
 pub fn style_section(
     input: &str,
@@ -35,7 +35,7 @@ fn style_member(input: &str) -> IResult<&str, Style> {
 #[cfg(test)]
 mod tests {
 
-    use crate::collection::style_parser::*;
+    use crate::def_parser::style_parser::*;
     use std::io::Read;
 
     #[test]

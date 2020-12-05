@@ -10,8 +10,8 @@ use nom::sequence::{delimited, pair, preceded, separated_pair, tuple};
 use nom::IResult;
 use std::str;
 
-use super::base::{float, number, number_str, qstring, tstring, ws};
-use super::def_types::{Geometry, PropValue, Properties, RouteBody, RouteElem, RtPt};
+use crate::def_parser::base::{float, number, number_str, qstring, tstring, ws};
+use crate::def_parser::def_types::{Geometry, PropValue, Properties, RouteBody, RouteElem, RtPt};
 // common parser used in def_parser. These parser are very commonly used in def_parser so collect them together.
 
 pub fn pt(input: &str) -> IResult<&str, (&str, &str)> {
@@ -154,7 +154,7 @@ pub fn route_body(input: &str) -> IResult<&str, RouteBody> {
 
 #[cfg(test)]
 mod tests {
-    use crate::collection::common::*;
+    use crate::def_parser::common::*;
 
     #[test]
     fn test_pt() {

@@ -7,9 +7,9 @@ use nom::sequence::{delimited, pair, preceded, terminated, tuple};
 use nom::IResult;
 
 // def
-use super::base::{number, tstring, ws};
-use super::common::{pt_list, rect};
-use super::def_types::{Geometry, Via, ViaBody};
+use crate::def_parser::base::{number, tstring, ws};
+use crate::def_parser::common::{pt_list, rect};
+use crate::def_parser::def_types::{Geometry, Via, ViaBody};
 
 pub fn via_section(
     input: &str,
@@ -78,7 +78,7 @@ fn via_member(input: &str) -> IResult<&str, Via> {
 #[cfg(test)]
 mod tests {
 
-    use crate::collection::via_parser::*;
+    use crate::def_parser::via_parser::*;
     use std::io::Read;
 
     #[test]

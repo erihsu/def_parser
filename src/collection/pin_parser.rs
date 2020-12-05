@@ -7,10 +7,10 @@ use nom::sequence::{delimited, preceded, terminated, tuple};
 use nom::IResult;
 
 // def
-use super::base::{number, qstring, tstring, ws};
-use super::common::{pt_list, pt_new, rect};
-use super::def_types::{Location, Pin, Port, PortElem};
-use super::encoder::{
+use crate::def_parser::base::{number, qstring, tstring, ws};
+use crate::def_parser::common::{pt_list, pt_new, rect};
+use crate::def_parser::def_types::{Location, Pin, Port, PortElem};
+use crate::def_parser::encoder::{
     orient_encode, pin_direction_encode, pin_location_attribute_encode, use_mode_encode,
 };
 
