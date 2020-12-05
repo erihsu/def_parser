@@ -8,10 +8,10 @@ use nom::sequence::{delimited, pair, preceded, terminated, tuple};
 use nom::IResult;
 
 // def
-use crate::def_parser::base::{number, tstring, ws};
-use crate::def_parser::common::{properties, pt_list, rect, route_body};
-use crate::def_parser::def_types::{SNet, SNetProperty, SpecialWireBasic, SpecialWireStmt};
-use crate::def_parser::encoder::{
+use super::base::{number, tstring, ws};
+use super::common::{properties, pt_list, rect, route_body};
+use super::def_types::{SNet, SNetProperty, SpecialWireBasic, SpecialWireStmt};
+use super::encoder::{
     net_pattern_encode, snet_global_attribute_encode, snet_shape_encode, source_type_encode,
     use_mode_encode,
 };

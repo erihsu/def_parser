@@ -7,9 +7,9 @@ use nom::sequence::{delimited, preceded, terminated, tuple};
 use nom::IResult;
 
 // def
-use crate::def_parser::base::{float, number, tstring, ws};
-use crate::def_parser::common::rect_or_polygon;
-use crate::def_parser::def_types::Blockage;
+use super::base::{float, number, tstring, ws};
+use super::common::rect_or_polygon;
+use super::def_types::Blockage;
 
 pub fn blockage_section(
     input: &str,
@@ -122,8 +122,8 @@ fn placement_blockage_rule(
 
 // #[cfg(test)]
 // mod tests {
-//     use crate::def_parser::blockage_parser::*;
-//     use crate::def_parser::def_types::*;
+//     use super::blockage_parser::*;
+//     use super::def_types::*;
 //     use std::io::Read;
 
 //     #[test]

@@ -5,7 +5,7 @@ use nom::sequence::delimited;
 use nom::IResult;
 
 // def
-use crate::def_parser::base::{tstring, ws};
+use super::base::{tstring, ws};
 
 pub fn maskshift_section(input: &str) -> IResult<&str, Vec<&str>> {
     delimited(tag("COMPONENTMASKSHIFT"), many1(tstring), ws(tag(";")))(input)

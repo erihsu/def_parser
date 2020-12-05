@@ -7,10 +7,10 @@ use nom::sequence::{delimited, preceded, terminated, tuple};
 use nom::IResult;
 
 // def
-use crate::def_parser::base::{number, qstring, tstring, ws};
-use crate::def_parser::common::{pt_list, pt_new, rect};
-use crate::def_parser::def_types::{Location, Pin, Port, PortElem};
-use crate::def_parser::encoder::{
+use super::base::{number, qstring, tstring, ws};
+use super::common::{pt_list, pt_new, rect};
+use super::def_types::{Location, Pin, Port, PortElem};
+use super::encoder::{
     orient_encode, pin_direction_encode, pin_location_attribute_encode, use_mode_encode,
 };
 
@@ -104,7 +104,7 @@ fn pin_port_element(input: &str) -> IResult<&str, PortElem> {
 // #[cfg(test)]
 // mod tests {
 
-//     use crate::def_parser::pin_parser::*;
+//     use super::pin_parser::*;
 //     use std::io::Read;
 
 //     #[test]

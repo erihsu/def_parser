@@ -7,9 +7,9 @@ use nom::sequence::{delimited, preceded, terminated, tuple};
 use nom::IResult;
 
 // def
-use crate::def_parser::base::{component_pattern, number, tstring, ws};
-use crate::def_parser::common::properties;
-use crate::def_parser::def_types::Group;
+use super::base::{component_pattern, number, tstring, ws};
+use super::common::properties;
+use super::def_types::Group;
 
 pub fn group_section(
     input: &str,
@@ -48,8 +48,8 @@ fn group_member(input: &str) -> IResult<&str, Group> {
 
 // #[cfg(test)]
 // mod tests {
-//     use crate::def_parser::def_types::*;
-//     use crate::def_parser::group_parser::*;
+//     use super::def_types::*;
+//     use super::group_parser::*;
 //     use std::io::Read;
 
 //     #[test]

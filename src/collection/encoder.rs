@@ -5,7 +5,7 @@ use nom::combinator::map;
 use nom::sequence::preceded;
 use nom::IResult;
 
-use crate::def_parser::base::ws;
+use super::base::ws;
 
 pub fn orient_encode(input: &str) -> IResult<&str, i32> {
     ws(alt((
@@ -123,14 +123,14 @@ pub fn pin_direction_encode(input: &str) -> IResult<&str, i32> {
     )(input)
 }
 
-pub fn pin_antenna_model_encode(input: &str) -> IResult<&str, i32> {
-    alt((
-        map(tag("OXIDE1"), |_| 0),
-        map(tag("OXIDE2"), |_| 1),
-        map(tag("OXIDE3"), |_| 2),
-        map(tag("OXIDE4"), |_| 3),
-    ))(input)
-}
+// pub fn pin_antenna_model_encode(input: &str) -> IResult<&str, i32> {
+//     alt((
+//         map(tag("OXIDE1"), |_| 0),
+//         map(tag("OXIDE2"), |_| 1),
+//         map(tag("OXIDE3"), |_| 2),
+//         map(tag("OXIDE4"), |_| 3),
+//     ))(input)
+// }
 
 pub fn region_type_encode(input: &str) -> IResult<&str, i32> {
     ws(preceded(
