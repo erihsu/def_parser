@@ -78,8 +78,8 @@ fn ndr_layer(
 
 // #[cfg(test)]
 // mod tests {
-//     use crate::def_parser::def_types::*;
-//     use crate::def_parser::nondefaultrule_parser::*;
+//     use super::def_types::*;
+//     use super::nondefaultrule_parser::*;
 //     use std::io::Read;
 
 //     #[test]

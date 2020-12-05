@@ -122,8 +122,8 @@ fn placement_blockage_rule(
 
 // #[cfg(test)]
 // mod tests {
-//     use crate::def_parser::blockage_parser::*;
-//     use crate::def_parser::def_types::*;
+//     use super::blockage_parser::*;
+//     use super::def_types::*;
 //     use std::io::Read;
 
 //     #[test]

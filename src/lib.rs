@@ -19,4 +19,4 @@ pub use collection::snet_parser::snet_section;
 pub use collection::style_parser::style_section;
 pub use collection::via_parser::via_section;
 
-pub mod collection;
+mod collection;

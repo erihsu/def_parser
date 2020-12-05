@@ -104,7 +104,7 @@ fn pin_port_element(input: &str) -> IResult<&str, PortElem> {
 // #[cfg(test)]
 // mod tests {
 
-//     use crate::def_parser::pin_parser::*;
+//     use super::pin_parser::*;
 //     use std::io::Read;
 
 //     #[test]

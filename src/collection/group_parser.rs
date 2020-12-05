@@ -48,8 +48,8 @@ fn group_member(input: &str) -> IResult<&str, Group> {
 
 // #[cfg(test)]
 // mod tests {
-//     use crate::def_parser::def_types::*;
-//     use crate::def_parser::group_parser::*;
+//     use super::def_types::*;
+//     use super::group_parser::*;
 //     use std::io::Read;
 
 //     #[test]

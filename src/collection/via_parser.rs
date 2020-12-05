@@ -75,21 +75,21 @@ fn via_member(input: &str) -> IResult<&str, Via> {
     )(input)
 }
 
-#[cfg(test)]
-mod tests {
+// #[cfg(test)]
+// mod tests {
 
-    use crate::collection::via_parser::*;
-    use std::io::Read;
+//     use super::via_parser::*;
+//     use std::io::Read;
 
-    #[test]
-    fn test_via_section() {
-        let mut input_def = std::fs::File::open("tests/via_test.def").unwrap();
-        let mut data = String::new();
-        input_def.read_to_string(&mut data).unwrap();
-        let result = via_section(&data).unwrap();
-        let via_section = result.1;
-        let num = via_section.0;
-        let _vias = via_section.1;
-        assert_eq!(num, 6);
-    }
-}
+//     #[test]
+//     fn test_via_section() {
+//         let mut input_def = std::fs::File::open("tests/via_test.def").unwrap();
+//         let mut data = String::new();
+//         input_def.read_to_string(&mut data).unwrap();
+//         let result = via_section(&data).unwrap();
+//         let via_section = result.1;
+//         let num = via_section.0;
+//         let _vias = via_section.1;
+//         assert_eq!(num, 6);
+//     }
+// }

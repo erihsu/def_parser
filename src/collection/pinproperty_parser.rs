@@ -35,8 +35,8 @@ fn pinproperty_member(input: &str) -> IResult<&str, Pinprop> {
 
 // #[cfg(test)]
 // mod tests {
-//     use crate::def_parser::def_types::*;
-//     use crate::def_parser::pinproperty_parser::*;
+//     use super::def_types::*;
+//     use super::pinproperty_parser::*;
 //     use std::io::Read;
 
 //     #[test]

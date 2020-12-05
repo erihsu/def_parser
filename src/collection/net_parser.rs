@@ -159,9 +159,9 @@ fn net_property(input: &str) -> IResult<&str, NetProperty> {
 // #[cfg(test)]
 // mod tests {
 
-//     use crate::def_parser::def_types::PropValue;
-//     use crate::def_parser::def_types::RouteElem;
-//     use crate::def_parser::net_parser::*;
+//     use super::def_types::PropValue;
+//     use super::def_types::RouteElem;
+//     use super::net_parser::*;
 //     use std::io::Read;
 
 //     #[test]
