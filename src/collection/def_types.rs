@@ -27,7 +27,7 @@ pub type Row<'a> = (
     &'a str, // row rule type
     i32,     //  the origin of rule scope along axis X
     i32,     // the origin of rule scope along axis Y
-    i32,     // orient of row rule
+    OrientT, // orient of row rule
     i32,     // step number along axis X
     i32,     // step number along axis Y
     i32,     // step size along axis X
@@ -70,9 +70,9 @@ pub enum Geometry {
 }
 
 pub type Location = (
-    i32,        // location attribute
+    LocAtrriT,  // location attribute
     (i32, i32), // location
-    i32,        // orient
+    OrientT,    // orient
 );
 
 pub type Pts = Vec<(i32, i32)>;
@@ -99,7 +99,7 @@ pub type Ndr<'a> = (
 
 // SLOT
 pub type Slot<'a> = (
-    &'a str,       // name of slot
+    &'a str,       // layer name
     Vec<Geometry>, // rect/polygon
 );
 
@@ -155,7 +155,7 @@ pub type Region<'a> = (
         Vec<Rect>, // define a region as one or more rectangular areas specified by pairs of coordinate points
     ),
     (
-        Option<i32>, // TYPE. FENCE or GUIDE
+        Option<RegionT>, // TYPE. FENCE or GUIDE
         Properties<'a>,
     ),
 );
@@ -216,14 +216,14 @@ pub type Component<'a> = (
         &'a str, // model name
     ), // basic
     (
-        Option<&'a str>,                    // EEQMASTER
-        Option<i32>,                        // SOURCE
-        (i32, Option<((i32, i32), i32)>),   // location and attribute
-        Option<i32>,                        // WEIGHT
-        Option<&'a str>,                    // REGION
-        Option<(bool, i32, i32, i32, i32)>, // HALO
-        Option<(i32, &'a str, &'a str)>,    // ROUTEDHALO
-        Properties<'a>,                     // Properties
+        Option<&'a str>,                            // EEQMASTER
+        Option<SourceT>,                            // SOURCE
+        (LocAtrriT, Option<((i32, i32), OrientT)>), // location and attribute
+        Option<i32>,                                // WEIGHT
+        Option<&'a str>,                            // REGION
+        Option<(bool, i32, i32, i32, i32)>,         // HALO
+        Option<(i32, &'a str, &'a str)>,            // ROUTEDHALO
+        Properties<'a>,                             // Properties
     ), //feature
 );
 
@@ -252,7 +252,7 @@ pub type RegularWireBasic<'a> = (
 );
 
 pub type RegularWireStmt<'a> = (
-    i32, // 0: cover; 1: fixed; 2: routed; 3: noshield
+    LocAtrriT, // 0: cover; 1: fixed; 2: routed; 3: noshield
     Vec<RegularWireBasic<'a>>,
 );
 
@@ -277,9 +277,9 @@ pub type Vpin<'a> = (
     &'a str,                  // vpin name
     &'a str,                  // layer name
     ((i32, i32), (i32, i32)), // vpin geometry
-    i32,                      // 0: placed ; 1: fixed ; 2: covered
+    LocAtrriT,                // 0: placed ; 1: fixed ; 2: covered
     (i32, i32),               // vpin location
-    i32,                      // orient
+    OrientT,                  // orient
 );
 
 pub type SubNet<'a> = (
@@ -300,10 +300,10 @@ pub type SubNet<'a> = (
 
 // Special Net
 pub type SpecialWireBasic<'a> = (
-    &'a str,     // layer name
-    i32,         // route width
-    Option<i32>, // shape code
-    Option<i32>, // stylNum,
+    &'a str,        // layer name
+    i32,            // route width
+    Option<ShapeT>, // shape code
+    Option<i32>,    // stylNum,
     RouteBody<'a>,
 );
 
@@ -312,7 +312,7 @@ pub enum SpecialWireStmt<'a> {
     Rect((&'a str, Rect)),
     Route(
         (
-            i32, // location attribute
+            LocAtrriT, // location attribute
             Vec<SpecialWireBasic<'a>>,
         ),
     ),
@@ -332,26 +332,26 @@ pub type SNet<'a> = (
 
 // NetProperty that used in NET
 pub type NetProperty<'a> = (
-    Option<i32>,     //SOURCE. 0: DIST; 1: NETLIST; 2:TEST; 3:TIMING; 4:USER
-    bool,            // FIXEDBUMP
-    Option<f64>,     // FREQUENCY
-    Option<&'a str>, // ORIGINAL
-    Option<i32>, // USE. 0: ANALOG; 1:CLOCK; 2:GROUND; 3:POWER; 4:RESET; 5: SCAN; 6:SIGNAL; 7: TIEOFF
-    Option<i32>, // PATTERN. 0: BALANCED; 1:STEINER; 2:TRUNK; 3:WIREDLOGIC
-    Option<i32>, // ESTCAP
-    Option<i32>, // WEIGHT
+    Option<SourceT>,  //SOURCE. 0: DIST; 1: NETLIST; 2:TEST; 3:TIMING; 4:USER
+    bool,             // FIXEDBUMP
+    Option<f64>,      // FREQUENCY
+    Option<&'a str>,  // ORIGINAL
+    Option<UseModeT>, // USE. 0: ANALOG; 1:CLOCK; 2:GROUND; 3:POWER; 4:RESET; 5: SCAN; 6:SIGNAL; 7: TIEOFF
+    Option<PatternT>, // PATTERN. 0: BALANCED; 1:STEINER; 2:TRUNK; 3:WIREDLOGIC
+    Option<i32>,      // ESTCAP
+    Option<i32>,      // WEIGHT
     Properties<'a>,
 );
 
 // NetProperty that used in Special Net
 pub type SNetProperty<'a> = (
-    i32,             //SOURCE. 0: DIST; 1: NETLIST; 2:TEST; 3:TIMING; 4:USER
-    bool,            // FIXEDBUMP
-    Option<&'a str>, // ORIGINAL
-    i32, // USE. 0: ANALOG; 1:CLOCK; 2:GROUND; 3:POWER; 4:RESET; 5: SCAN; 6:SIGNAL; 7: TIEOFF
-    i32, // PATTERN. 0: BALANCED; 1:STEINER; 2:TRUNK; 3:WIREDLOGIC
-    Option<i32>, // ESTCAP
-    Option<i32>, // WEIGHT
+    Option<SourceT>,  //SOURCE. 0: DIST; 1: NETLIST; 2:TEST; 3:TIMING; 4:USER
+    bool,             // FIXEDBUMP
+    Option<&'a str>,  // ORIGINAL
+    Option<UseModeT>, // USE. 0: ANALOG; 1:CLOCK; 2:GROUND; 3:POWER; 4:RESET; 5: SCAN; 6:SIGNAL; 7: TIEOFF
+    Option<PatternT>, // PATTERN. 0: BALANCED; 1:STEINER; 2:TRUNK; 3:WIREDLOGIC
+    Option<i32>,      // ESTCAP
+    Option<i32>,      // WEIGHT
     Properties<'a>,
 );
 
@@ -365,12 +365,12 @@ pub type Style = (
 pub type Pin<'a> = (
     (&'a str, &'a str), // pinName & netName
     (
-        bool,            // Whether special
-        Option<i32>,     // direction
-        Option<&'a str>, // NetExpre
-        Option<&'a str>, // PowerPin name
-        Option<&'a str>, // GroundPin name
-        Option<i32>,     // pin mode
+        bool,                // Whether special
+        Option<DirecttionT>, // direction
+        Option<&'a str>,     // NetExpre
+        Option<&'a str>,     // PowerPin name
+        Option<&'a str>,     // GroundPin name
+        Option<PinModeT>,    // pin mode
         // antenna not supported
         Port<'a>,
     ), //
@@ -430,3 +430,13 @@ pub type ScanChain<'a> = (
         &'a str,         // pin name
     )>, // stop.
 );
+
+type OrientT = i8;
+type LocAtrriT = i8;
+type PinModeT = i8;
+type DirecttionT = i8;
+type SourceT = i8;
+type UseModeT = i8;
+type PatternT = i8;
+type ShapeT = i8;
+type RegionT = i8;

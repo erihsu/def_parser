@@ -7,7 +7,7 @@ use nom::IResult;
 
 use super::base::ws;
 
-pub fn orient_encode(input: &str) -> IResult<&str, i32> {
+pub fn orient_encode(input: &str) -> IResult<&str, i8> {
     ws(alt((
         map(tag("N"), |_| 0),
         map(tag("W"), |_| 1),
@@ -21,7 +21,7 @@ pub fn orient_encode(input: &str) -> IResult<&str, i32> {
 }
 
 // source type must be preceded with "SOURCE" keyword
-pub fn source_type_encode(input: &str) -> IResult<&str, i32> {
+pub fn source_type_encode(input: &str) -> IResult<&str, i8> {
     preceded(
         ws(tag("+ SOURCE")),
         ws(alt((
@@ -35,7 +35,7 @@ pub fn source_type_encode(input: &str) -> IResult<&str, i32> {
 }
 
 // shape type used in snet parser
-pub fn snet_shape_encode(input: &str) -> IResult<&str, i32> {
+pub fn snet_shape_encode(input: &str) -> IResult<&str, i8> {
     preceded(
         ws(tag("+ SHAPE")),
         alt((
@@ -56,7 +56,7 @@ pub fn snet_shape_encode(input: &str) -> IResult<&str, i32> {
 }
 
 // compatible in net and snet
-pub fn use_mode_encode(input: &str) -> IResult<&str, i32> {
+pub fn use_mode_encode(input: &str) -> IResult<&str, i8> {
     preceded(
         ws(tag("+ USE")),
         alt((
@@ -73,7 +73,7 @@ pub fn use_mode_encode(input: &str) -> IResult<&str, i32> {
 }
 
 // compatible in net and snet
-pub fn net_pattern_encode(input: &str) -> IResult<&str, i32> {
+pub fn net_pattern_encode(input: &str) -> IResult<&str, i8> {
     ws(preceded(
         ws(tag("+ PATTERN")),
         alt((
@@ -85,7 +85,7 @@ pub fn net_pattern_encode(input: &str) -> IResult<&str, i32> {
     ))(input)
 }
 
-pub fn snet_global_attribute_encode(input: &str) -> IResult<&str, i32> {
+pub fn snet_global_attribute_encode(input: &str) -> IResult<&str, i8> {
     ws(alt((
         map(ws(tag("+ COVER")), |_| 0),
         map(ws(tag("+ FIXED")), |_| 1),
@@ -94,7 +94,7 @@ pub fn snet_global_attribute_encode(input: &str) -> IResult<&str, i32> {
     )))(input)
 }
 
-pub fn net_global_attribute_encode(input: &str) -> IResult<&str, i32> {
+pub fn net_global_attribute_encode(input: &str) -> IResult<&str, i8> {
     ws(alt((
         map(tag("COVER"), |_| 0),
         map(tag("FIXED"), |_| 1),
@@ -103,7 +103,7 @@ pub fn net_global_attribute_encode(input: &str) -> IResult<&str, i32> {
     )))(input)
 }
 
-pub fn pin_location_attribute_encode(input: &str) -> IResult<&str, i32> {
+pub fn pin_location_attribute_encode(input: &str) -> IResult<&str, i8> {
     ws(alt((
         map(ws(tag("+ PLACED")), |_| 0),
         map(ws(tag("+ FIXED")), |_| 1),
@@ -111,7 +111,7 @@ pub fn pin_location_attribute_encode(input: &str) -> IResult<&str, i32> {
     )))(input)
 }
 
-pub fn pin_direction_encode(input: &str) -> IResult<&str, i32> {
+pub fn pin_direction_encode(input: &str) -> IResult<&str, i8> {
     preceded(
         ws(tag("+ DIRECTION")),
         alt((
@@ -132,14 +132,14 @@ pub fn pin_direction_encode(input: &str) -> IResult<&str, i32> {
 //     ))(input)
 // }
 
-pub fn region_type_encode(input: &str) -> IResult<&str, i32> {
+pub fn region_type_encode(input: &str) -> IResult<&str, i8> {
     ws(preceded(
         ws(tag("+ TYPE")),
         alt((map(tag("FENCE"), |_| 0), map(tag("GUIDE"), |_| 1))),
     ))(input)
 }
 
-pub fn component_location_attribute_encode(input: &str) -> IResult<&str, i32> {
+pub fn component_location_attribute_encode(input: &str) -> IResult<&str, i8> {
     ws(alt((
         map(ws(tag("+ FIXED")), |_| 0),
         map(ws(tag("+ COVER")), |_| 1),

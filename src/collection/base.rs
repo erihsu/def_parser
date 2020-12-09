@@ -17,11 +17,11 @@ use std::str::FromStr;
 /// trailing whitespace, returning the output of `inner`.
 pub fn ws<'a, F: 'a, O, E: ParseError<&'a str>>(
     inner: F,
-) -> impl Fn(&'a str) -> IResult<&'a str, O, E>
+) -> impl FnMut(&'a str) -> IResult<&'a str, O, E>
 where
-    F: Fn(&'a str) -> IResult<&'a str, O, E>,
+    F: FnMut(&'a str) -> IResult<&'a str, O, E>,
 {
-    move |i| delimited(multispace0, &inner, multispace0)(i)
+    delimited(multispace0, inner, multispace0)
 }
 
 // // typical string

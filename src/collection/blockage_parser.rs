@@ -5,7 +5,6 @@ use nom::combinator::{map, opt};
 use nom::multi::many0;
 use nom::sequence::{delimited, preceded, terminated, tuple};
 use nom::IResult;
-
 // def
 use super::base::{float, number, tstring, ws};
 use super::common::rect_or_polygon;

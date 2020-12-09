@@ -5,5 +5,5 @@ authors = ["Eric Xu <zenyeehsu@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-nom = "5.0"
+nom = "6.0"
 
