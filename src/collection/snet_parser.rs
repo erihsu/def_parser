@@ -62,15 +62,11 @@ fn snet_member(input: &str) -> IResult<&str, SNet> {
     )(input)
 }
 
-fn special_wire_shape(input: &str) -> IResult<&str, i32> {
-    preceded(ws(tag("+")), snet_shape_encode)(input)
-}
-
 fn special_wire_basic(input: &str) -> IResult<&str, SpecialWireBasic> {
     tuple((
         tstring,
         number,
-        opt(special_wire_shape),
+        opt(snet_shape_encode),
         opt(preceded(ws(tag("+ STYLE")), number)),
         route_body,
     ))(input)
@@ -100,14 +96,14 @@ fn special_wiring(input: &str) -> IResult<&str, SpecialWireStmt> {
 
 fn snet_property(input: &str) -> IResult<&str, SNetProperty> {
     tuple((
-        source_type_encode,
+        opt(source_type_encode),
         map(opt(ws(tag("+ FIXEDBUMP"))), |res: Option<&str>| match res {
             Some(_) => true,
             None => false,
         }),
         opt(preceded(ws(tag("+ ORIGINAL")), tstring)),
-        use_mode_encode,
-        net_pattern_encode,
+        opt(use_mode_encode),
+        opt(net_pattern_encode),
         opt(preceded(ws(tag("+ ESTCAP")), number)),
         opt(preceded(ws(tag("+ WEIGHT")), number)),
         properties,
